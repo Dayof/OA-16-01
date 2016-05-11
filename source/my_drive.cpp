@@ -36,7 +36,7 @@ int main()
 // Construtor de setores
 block *createBlock(unsigned char *bytes)
 {
-    block *b = (block*)calloc(512,sizeof(unsigned char));
+    block *b = (block*)malloc(sizeof(unsigned char));
     
     memcpy(b->bytes_s, bytes, sizeof(&bytes));
     printf("%s\n", b->bytes_s);
@@ -48,7 +48,7 @@ block *createBlock(unsigned char *bytes)
 // Construtor de cluster
 cluster_array *createCluster(block *b)
 {
-    cluster_array *ca = (cluster_array*)calloc(4, sizeof(b));
+    cluster_array *ca = (cluster_array*)malloc(sizeof(b));
     
     ca->sector[0] = *b;
 
@@ -58,7 +58,7 @@ cluster_array *createCluster(block *b)
 // Construtor de trilha
 sector_array *createTrack(cluster_array *ca)
 {
-    sector_array *sa = (sector_array*)calloc(15, sizeof(ca));
+    sector_array *sa = (sector_array*)malloc(sizeof(ca));
     
     sa->cluster[0] = *ca;
 
@@ -68,7 +68,7 @@ sector_array *createTrack(cluster_array *ca)
 // Construtor de cilindro
 track_array *createCylinder(sector_array *sa)
 {
-    track_array *ta = (track_array*)calloc(5, sizeof(sa));
+    track_array *ta = (track_array*)malloc(sizeof(sa));
     
     ta->track[0] = *sa;
 
