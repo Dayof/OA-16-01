@@ -3,7 +3,7 @@ INCLUDE_DIR=include
 OBJ_DIR=obj
 
 CC=g++
-CFLAGS=-I$(INCLUDE_DIR)
+CFLAGS=-I$(INCLUDE_DIR)/
 
 LIBS=-lm
 
