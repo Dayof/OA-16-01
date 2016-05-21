@@ -8,72 +8,76 @@ Desenvolvedoras:
 
 int main()
 {
-    unsigned char *var;
-    memcpy(var, "hm", 3);
+    string var;
+
+    cin >> var;
 
     block *b = createBlock(var);
-    cluster_array *ca = createCluster(b);
-    sector_array *sa = createTrack(ca);
-    track_array *ta = createCylinder(sa);
+    sector_array *sa = createSector(b);
+    cluster_array *ca = createCluster(sa);
+    track_array *ta = createTrack(ca);
+    createCylinder(ta);
 
-    printf("block: %s\n",b->bytes_s);
+    cout << "block: " << b->bytes_s << endl;
+    cout << "block from sector: " << sa->sector[0].bytes_s << endl;
+    cout << "block from sector from cluster: " << ca->cluster[0].sector[0].bytes_s << endl;
+    cout << "block from sector from cluster from track: " << ta->track[0].cluster[0].sector[0].bytes_s << endl;
+    cout << "block from sector from cluster from track from cylinder: " << cylinder->track[0].cluster[0].sector[0].bytes_s << endl;
     getchar();
 
-    printf("block from cluster: %s\n",ca->sector[0].bytes_s);
-    getchar();
-
-    printf("block from cluster from track: %s\n",sa->cluster[0].sector[0].bytes_s);
-    getchar();
-
-    printf("block from cluster from track from cylinder: %s\n",ta->track[0].cluster[0].sector[0].bytes_s);
-    getchar();
-
-    showMenu();
+    //showMenu();
 
     return 0;
 }
 
-// Construtor de setores
-block *createBlock(unsigned char *bytes)
+// Alocando no setor
+block *createBlock(const string& bytes)
 {
-    block *b = (block*)malloc(sizeof(unsigned char));
-    
-    memcpy(b->bytes_s, bytes, sizeof(&bytes));
-    printf("%s\n", b->bytes_s);
-    getchar();
-
+    block *b = new block;
+    b->bytes_s = bytes;
     return b;
 }
 
-// Construtor de cluster
-cluster_array *createCluster(block *b)
+// Construtor de setor
+sector_array *createSector(block *b)
 {
-    cluster_array *ca = (cluster_array*)malloc(sizeof(b));
-    
-    ca->sector[0] = *b;
-
-    return ca;
-}
-
-// Construtor de trilha
-sector_array *createTrack(cluster_array *ca)
-{
-    sector_array *sa = (sector_array*)malloc(sizeof(ca));
-    
-    sa->cluster[0] = *ca;
-
+    sector_array *sa = new sector_array;
+    sa->sector[0] = *b;
     return sa;
 }
 
-// Construtor de cilindro
-track_array *createCylinder(sector_array *sa)
+// Construtor de cluster
+cluster_array *createCluster(sector_array *sa)
 {
-    track_array *ta = (track_array*)malloc(sizeof(sa));
-    
-    ta->track[0] = *sa;
+    cluster_array *ca = new cluster_array;
+    ca->cluster[0] = *sa;
+    return ca;
+}
 
+// Construtor da trilha
+track_array *createTrack(cluster_array *ca)
+{
+    track_array *ta = new track_array;
+    ta->track[0] = *ca;
     return ta;
 }
+
+// Construtor do cilindro
+void *createCylinder(track_array *ta)
+{
+    cylinder = new track_array;
+    *cylinder= *ta;
+}
+
+// return the index of the cluster empty locate at track_array struct
+// int checkClusterEmpty(sector_array *sa)
+// {
+//     int index;
+
+
+
+//     return 
+// }
 
 // Funcao que mostra o menu inicial
 void showMenu()

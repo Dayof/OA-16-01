@@ -1,34 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string>
 #include <string.h>
+#include <iostream>
+
+using namespace std;
 
 // Estrutura de bloco 
 typedef struct block 
 {
     // Tamanho de cada setor
-    unsigned char bytes_s[512];
+    string bytes_s;
 } block;
 
 // Estrutura de cluster
-typedef struct cluster_array 
+typedef struct sector_array 
 {
     // Setores por cluster
     block sector[4];
-} cluster_array;
+} sector_array;
 
 // Estrutura de setor
-typedef struct sector_array 
+typedef struct cluster_array
 {
     // Cluster por trilha
-    cluster_array cluster[15];
-} sector_array;
+    sector_array cluster[15];
+} cluster_array;
 
 // Estrutura de trilha
 typedef struct track_array 
 {
     // trilhas por cilindro
-    sector_array track[5];
+    cluster_array track[5];
 } track_array;
 
 // Ponteiro para o cilindro
@@ -66,10 +70,11 @@ typedef struct fatent_s
 void showMenu();
 void clearScreen();
 
-block *createBlock(unsigned char*);
-cluster_array *createCluster(block*);
-sector_array *createTrack(cluster_array*);
-track_array *createCylinder(sector_array*);
+block *createBlock(const string&);
+sector_array *createSector(block*);
+cluster_array *createCluster(sector_array*);
+track_array *createTrack(cluster_array*);
+void *createCylinder(track_array*);
 
 void writeFile();
 void readFile();

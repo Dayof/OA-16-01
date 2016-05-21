@@ -28,4 +28,4 @@ $(TARGET): $(OBJ)
 .PHONY: clean
 
 clean: 
-	rm -f $(OBJ_DIR)/%.o *~ core $(INCLUDE_DIR)/*~
+	rm -f $(OBJ) $(TARGET)
