@@ -4,51 +4,54 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
 // Estrutura de bloco 
-typedef struct block 
+struct block 
 {
     // Tamanho de cada setor
+    // Limite de 512 bytes
     string bytes_s;
-} block;
+};
 
 // Estrutura de cluster
-typedef struct sector_array 
+struct sector_array 
 {
     // Setores por cluster
-    block sector[4];
-} sector_array;
+    vector<block> sector;
+};
 
 // Estrutura de setor
-typedef struct cluster_array
+struct cluster_array
 {
     // Cluster por trilha
-    sector_array cluster[15];
-} cluster_array;
+    vector<sector_array> cluster;
+};
 
 // Estrutura de trilha
-typedef struct track_array 
+struct track_array 
 {
     // trilhas por cilindro
-    cluster_array track[5];
-} track_array;
+    vector<cluster_array> track;
+};
 
 // Ponteiro para o cilindro
-track_array *cylinder;
+vector<track_array> cylinder;
 
 // Tabela FAT
-typedef struct fatlist_s
+struct fatlist_s
 {
     // Lista com os nomes dos arquivos
-    char file_name[100];
+    // Limite 100 caracteres
+    string file_name;
     // Primeiro setor onde o arquivo esta armazenado no HD
     unsigned int first_sector;
-} fatlist;
+};
 
 // Entrada na tabela FAT
-typedef struct fatent_s
+struct fatent_s
 {
     // Indica se o setor esta livre ou sendo utilizado
     unsigned int used;
@@ -56,7 +59,10 @@ typedef struct fatent_s
     unsigned int eof;
     // Informa proximo setor do arquivo
     unsigned int next;
-} fatent;
+};
+
+// Limite de 300 setores por cilindro
+vector<fatent_s> fatsec;
 
 #ifdef __linux__
     #define CLEAR "clear"
@@ -66,15 +72,18 @@ typedef struct fatent_s
     #define CLEAR "clear"
 #endif
 
+#define CLUSTER_SIZE 4
+#define TRACK_SIZE 15 
+#define CYLINDER_SIZE 5 
+
 // ASSINATURAS DAS FUNCOES
 void showMenu();
 void clearScreen();
 
-block *createBlock(const string&);
-sector_array *createSector(block*);
-cluster_array *createCluster(sector_array*);
-track_array *createTrack(cluster_array*);
-void *createCylinder(track_array*);
+fatlist_s initFatList();
+void initFatSec();
+void initCylinder(block);
+void insertBlock(const string&, int);
 
 void writeFile();
 void readFile();

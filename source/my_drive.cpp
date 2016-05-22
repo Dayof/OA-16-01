@@ -10,63 +10,81 @@ int main()
 {
     string var;
 
-    cin >> var;
-
-    block *b = createBlock(var);
-    sector_array *sa = createSector(b);
-    cluster_array *ca = createCluster(sa);
-    track_array *ta = createTrack(ca);
-    createCylinder(ta);
-
-    cout << "block: " << b->bytes_s << endl;
-    cout << "block from sector: " << sa->sector[0].bytes_s << endl;
-    cout << "block from sector from cluster: " << ca->cluster[0].sector[0].bytes_s << endl;
-    cout << "block from sector from cluster from track: " << ta->track[0].cluster[0].sector[0].bytes_s << endl;
-    cout << "block from sector from cluster from track from cylinder: " << cylinder->track[0].cluster[0].sector[0].bytes_s << endl;
-    getchar();
+    getline(cin, var);
+    //fatlist *ft = initFatList();
+    //initFatSec();
+    insertBlock(var, 0);
 
     //showMenu();
 
     return 0;
 }
 
-// Alocando no setor
-block *createBlock(const string& bytes)
+// fatlist initFatList()
+// {
+//     fatlist *ft = new fatlist;
+//     ft = NULL;
+//     return ft;
+// }
+
+// void initFatSec()
+// {
+//     fatsec.push_back(NULL);
+//     fatsec[0] = NULL;
+// }
+
+void initCylinder(block b)
 {
-    block *b = new block;
-    b->bytes_s = bytes;
-    return b;
+    cylinder.push_back(track_array());
+    cylinder[0].track.push_back(cluster_array());
+    cylinder[0].track[0].cluster.push_back(sector_array());
+    cylinder[0].track[0].cluster[0].sector.push_back(b);
+
+    cout << cylinder[0].track[0].cluster[0].sector[0].bytes_s << endl;
 }
 
-// Construtor de setor
-sector_array *createSector(block *b)
+//Alocando no setor
+void insertBlock(const string& bytes, int sector)
 {
-    sector_array *sa = new sector_array;
-    sa->sector[0] = *b;
-    return sa;
-}
+    vector<string> sectors;
+    string s, aux_s;
+    int l, s_limit;
+    while(bytes.size()>512){
+        l=0;
+        for(int k=0;k<4;++k){
+            aux_s = bytes.substr(l, bytes.size());
+            cout << aux_s << endl;
+            s_limit = aux_s.size()%512;
+            if(aux_s.size()<512){
+                s = s.substr(l-1, l+s_limit-1);
+                cout << "string cut: " << s << endl;
+            }
+            else{
+                s = aux_s;
+            }
+            sectors[k] = s;
+        }
+        l+=512;
+    }
 
-// Construtor de cluster
-cluster_array *createCluster(sector_array *sa)
-{
-    cluster_array *ca = new cluster_array;
-    ca->cluster[0] = *sa;
-    return ca;
-}
-
-// Construtor da trilha
-track_array *createTrack(cluster_array *ca)
-{
-    track_array *ta = new track_array;
-    ta->track[0] = *ca;
-    return ta;
-}
-
-// Construtor do cilindro
-void *createCylinder(track_array *ta)
-{
-    cylinder = new track_array;
-    *cylinder= *ta;
+    block b = {bytes};
+    if(!cylinder.empty()) 
+        for(int i=0; i<CYLINDER_SIZE; ++i)
+            for(int j=0; j<TRACK_SIZE; ++j){
+                if(cylinder[0].track[i].cluster[j].sector.size()<=CLUSTER_SIZE) 
+                {    
+                    for(int n=sectors.size(); n<4; ++n)
+                    {
+                        block b = {sectors[n]};
+                        cout << b.bytes_s << endl;
+                        cylinder[0].track[i].cluster[j].sector.push_back(b);
+                    }
+                }
+            }
+    else
+    {
+        initCylinder(b);
+    } 
 }
 
 // return the index of the cluster empty locate at track_array struct
