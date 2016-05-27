@@ -6,14 +6,29 @@ Desenvolvedoras:
 
 #include <my_drive.h>
 
-int main()
+int main( int argc, char *argv[] )
 {
+
+    vector <string> v;
+    ostringstream oss;
     string var;
 
-    getline(cin, var);
+    copy(istream_iterator<string>(cin),
+        istream_iterator<string>(),
+        back_inserter(v));
+
+    if (!v.empty())
+    {
+        std::copy(v.begin(), v.end()-1,
+            ostream_iterator<string>(oss, " "));
+
+        oss << v.back();
+    }
+    var = oss.str();
+        
     //fatlist *ft = initFatList();
     //initFatSec();
-    insertBlock(var, 0);
+    insertBlock(var);
 
     //showMenu();
 
@@ -33,58 +48,73 @@ int main()
 //     fatsec[0] = NULL;
 // }
 
-void initCylinder(block b)
+// receive index of the cylinder that will be create
+void initCylinder(block b, int index_cy)
 {
     cylinder.push_back(track_array());
-    cylinder[0].track.push_back(cluster_array());
-    cylinder[0].track[0].cluster.push_back(sector_array());
-    cylinder[0].track[0].cluster[0].sector.push_back(b);
+    cylinder[index_cy].track.push_back(cluster_array());
+    cylinder[index_cy].track[0].cluster.push_back(sector_array());
+    cylinder[index_cy].track[0].cluster[0].sector.push_back(b);
 
-    cout << cylinder[0].track[0].cluster[0].sector[0].bytes_s << endl;
+    cout << "string inserida ao iniciar cilindro: " << cylinder[index_cy].track[0].cluster[0].sector[0].bytes_s << endl;
+}
+
+vector<string> stringSector(const string& bytes)
+{
+    vector<string> sectors;
+    string aux_s(bytes);
+    int ind_string = 0;
+    cout << "valor inicial da string: " << aux_s.size() << endl;
+
+    while(aux_s.size()>512){
+        sectors.push_back(aux_s.substr(0,ind_string+512));
+        ind_string+=512;
+        aux_s = bytes.substr(ind_string);
+    }
+    sectors.push_back(aux_s);
+
+    for(int i=0;i<sectors.size();++i)
+        cout << "string " << i << ": " << sectors[i] << endl;
+
+    return sectors;
 }
 
 //Alocando no setor
-void insertBlock(const string& bytes, int sector)
+void insertBlock(const string& bytes)
 {
     vector<string> sectors;
-    string s, aux_s;
-    int l, s_limit;
-    while(bytes.size()>512){
-        l=0;
-        for(int k=0;k<4;++k){
-            aux_s = bytes.substr(l, bytes.size());
-            cout << aux_s << endl;
-            s_limit = aux_s.size()%512;
-            if(aux_s.size()<512){
-                s = s.substr(l-1, l+s_limit-1);
-                cout << "string cut: " << s << endl;
-            }
-            else{
-                s = aux_s;
-            }
-            sectors[k] = s;
-        }
-        l+=512;
-    }
+    int sec_size, it_size=0;
 
-    block b = {bytes};
-    if(!cylinder.empty()) 
-        for(int i=0; i<CYLINDER_SIZE; ++i)
-            for(int j=0; j<TRACK_SIZE; ++j){
-                if(cylinder[0].track[i].cluster[j].sector.size()<=CLUSTER_SIZE) 
+    sectors = stringSector(bytes);
+    sec_size = sectors.size();
+
+    cout << "tamanho do vetor das strings: " << sec_size << endl;
+
+    for(int i=0; i<CYLINDER_SIZE; ++i)
+    {
+        for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
+        {
+            //init cylinder
+            block b = {sectors[it_size]};
+            it_size++;
+            initCylinder(b, k);
+
+            for(int j=0; j<TRACK_SIZE; ++j)
+            {   
+                if(cylinder[k].track[i].cluster[j].sector.size()<=CLUSTER_SIZE)
                 {    
-                    for(int n=sectors.size(); n<4; ++n)
+                    // sectors available 
+                    for(int n=sectors.size(); n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
                     {
-                        block b = {sectors[n]};
-                        cout << b.bytes_s << endl;
-                        cylinder[0].track[i].cluster[j].sector.push_back(b);
+                        cout << it_size << endl;
+                        block b = {sectors[it_size]};
+                        cylinder[k].track[i].cluster[j].sector.push_back(b);
+                        cout << "string inserida nos setores: " << cylinder[k].track[i].cluster[j].sector[it_size].bytes_s << endl;
                     }
                 }
             }
-    else
-    {
-        initCylinder(b);
-    } 
+        }
+    }
 }
 
 // return the index of the cluster empty locate at track_array struct

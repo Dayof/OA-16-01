@@ -5,6 +5,8 @@
 #include <string.h>
 #include <iostream>
 #include <vector>
+#include <sstream>
+#include <iterator>
 
 using namespace std;
 
@@ -75,6 +77,7 @@ vector<fatent_s> fatsec;
 #define CLUSTER_SIZE 4
 #define TRACK_SIZE 15 
 #define CYLINDER_SIZE 5 
+#define CYLINDERS 3 
 
 // ASSINATURAS DAS FUNCOES
 void showMenu();
@@ -83,7 +86,7 @@ void clearScreen();
 fatlist_s initFatList();
 void initFatSec();
 void initCylinder(block);
-void insertBlock(const string&, int);
+void insertBlock(const string&);
 
 void writeFile();
 void readFile();
