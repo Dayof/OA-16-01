@@ -49,14 +49,23 @@ int main( int argc, char *argv[] )
 // }
 
 // receive index of the cylinder that will be create
-void initCylinder(block b, int index_cy)
+void initCylinder(int index_cy)
 {
     cylinder.push_back(track_array());
-    cylinder[index_cy].track.push_back(cluster_array());
-    cylinder[index_cy].track[0].cluster.push_back(sector_array());
-    cylinder[index_cy].track[0].cluster[0].sector.push_back(b);
+    for(int i=0; i<CYLINDER_SIZE; ++i)
+    {
+        cylinder[index_cy].track.push_back(cluster_array());
+        for(int j=0; j<TRACK_SIZE; ++j)
+        { 
+            cylinder[index_cy].track[i].cluster.push_back(sector_array());  
+            for(int n=0; n<CLUSTER_SIZE; ++n)
+            { 
+                cylinder[index_cy].track[i].cluster[j].sector.push_back(block());
+            }
+        }
+    }
 
-    cout << "string inserida ao iniciar cilindro: " << cylinder[index_cy].track[0].cluster[0].sector[0].bytes_s << endl;
+    
 }
 
 vector<string> stringSector(const string& bytes)
@@ -67,14 +76,18 @@ vector<string> stringSector(const string& bytes)
     cout << "valor inicial da string: " << aux_s.size() << endl;
 
     while(aux_s.size()>512){
-        sectors.push_back(aux_s.substr(0,ind_string+512));
+        sectors.push_back(aux_s.substr(0,512));
+        
         ind_string+=512;
         aux_s = bytes.substr(ind_string);
     }
     sectors.push_back(aux_s);
 
-    for(int i=0;i<sectors.size();++i)
+    for(int i=0;i<sectors.size();++i){
+        cout << "bytes string inserida: " << sectors[i].size() << endl;
         cout << "string " << i << ": " << sectors[i] << endl;
+    }
+        
 
     return sectors;
 }
@@ -95,23 +108,22 @@ void insertBlock(const string& bytes)
         for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
         {
             //init cylinder
-            block b = {sectors[it_size]};
-            it_size++;
-            initCylinder(b, k);
+            initCylinder(k);
 
             for(int j=0; j<TRACK_SIZE; ++j)
-            {   
-                if(cylinder[k].track[i].cluster[j].sector.size()<=CLUSTER_SIZE)
-                {    
-                    // sectors available 
-                    for(int n=sectors.size(); n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
-                    {
+            {    
+                for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
+                {
+                    // sectors available
+                    if(cylinder[k].track[i].cluster[j].sector[n].bytes_s == "")
+                    {    
                         cout << it_size << endl;
-                        block b = {sectors[it_size]};
-                        cylinder[k].track[i].cluster[j].sector.push_back(b);
-                        cout << "string inserida nos setores: " << cylinder[k].track[i].cluster[j].sector[it_size].bytes_s << endl;
+                        cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
+                        cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
+                        cout << "string inserida nos setores: " << cylinder[k].track[i].cluster[j].sector[n].bytes_s << endl;
                     }
                 }
+                
             }
         }
     }

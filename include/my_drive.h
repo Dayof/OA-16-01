@@ -85,7 +85,7 @@ void clearScreen();
 
 fatlist_s initFatList();
 void initFatSec();
-void initCylinder(block);
+void initCylinder(int);
 void insertBlock(const string&);
 
 void writeFile();
