@@ -52,6 +52,9 @@ struct fatlist_s
     unsigned int first_sector;
 };
 
+// Lista dos nomes dos arquivos inseridos
+vector<fatlist_s> fatfiles;
+
 // Entrada na tabela FAT
 struct fatent_s
 {
@@ -64,6 +67,7 @@ struct fatent_s
 };
 
 // Limite de 300 setores por cilindro
+// 900 setores no total (3 cilindros)
 vector<fatent_s> fatsec;
 
 #ifdef __linux__

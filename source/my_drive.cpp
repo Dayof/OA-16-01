@@ -9,6 +9,7 @@ Desenvolvedoras:
 int main( int argc, char *argv[] )
 {
 
+    //test with ./my_drive < db.txt
     vector <string> v;
     ostringstream oss;
     string var;
@@ -25,24 +26,24 @@ int main( int argc, char *argv[] )
         oss << v.back();
     }
     var = oss.str();
+
+    insertBlock(var);
+
+    //showMenu();  
         
     //fatlist *ft = initFatList();
     //initFatSec();
-    insertBlock(var);
-
-    //showMenu();
 
     return 0;
 }
 
-// fatlist initFatList()
+// void insertFatList()
 // {
-//     fatlist *ft = new fatlist;
-//     ft = NULL;
-//     return ft;
+//     fatlist_s fl = {file, sector}
+//     fatfiles.push_back(fatlist_s());
 // }
 
-// void initFatSec()
+// void insertFatSec()
 // {
 //     fatsec.push_back(NULL);
 //     fatsec[0] = NULL;
@@ -103,15 +104,15 @@ void insertBlock(const string& bytes)
 
     cout << "tamanho do vetor das strings: " << sec_size << endl;
 
-    for(int i=0; i<CYLINDER_SIZE; ++i)
+    for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
     {
-        for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
-        {
             //init cylinder
             initCylinder(k);
 
-            for(int j=0; j<TRACK_SIZE; ++j)
-            {    
+        for(int j=0; j<TRACK_SIZE; ++j)
+        {    
+            for(int i=0; i<CYLINDER_SIZE; ++i)
+            {
                 for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
                 {
                     // sectors available
@@ -142,6 +143,7 @@ void insertBlock(const string& bytes)
 // Funcao que mostra o menu inicial
 void showMenu()
 {
+    string buffer;
     int op;
 
     clearScreen();
@@ -181,26 +183,31 @@ void clearScreen()
 void writeFile()
 {
     size_t num_bytes;
-    char file[100], fileout[104], text[1024];
+    string text, file, fileout;
 
     // TODO : verificar se ele digitar com .txt na string
-    printf("Informe o nome do arquivo:\n(Até 100 caracteres)\n");
-    scanf("%101s", file);
-    getchar();
+    cout << "Informe o nome do arquivo: \n(Até 100 caracteres)" << endl;
+    getline(cin, file);
+    fileout=file + ".txt";
 
-    strcat(fileout, file);
-    strcat(fileout, ".txt");
+    cout << "ESCREVA ABAIXO\nQUANDO TERMINAR DE DIGITAR PRESSIONE A TECLA ENTER PARA GRAVAR NO ARQUIVO" << endl;
+    cout << endl;
 
-    printf("ESCREVA ABAIXO\nQUANDO TERMINAR DE DIGITAR PRESSIONE A TECLA ENTER PARA GRAVAR NO ARQUIVO\n\n");
-    scanf("%1024[^\n]", text);
+    getline(cin, text);
+
+    insertBlock(text);
+
 
     // TODO : confirmar o texto digitado, caso contrario possibilitar digitar novamente
-    printf("\n\nTEXTO DIGITADO\n\n");
-    printf("%s\n", text);
-    sleep(1);
+    cout << endl;
+    cout << endl;
+    cout << "TEXTO DIGITADO" << endl;
+    cout << endl;
 
-    // block b = {"hm"};
-    //printf("%s\n", b.bytes_s);
+    cout << text << endl;
+
+    cout << "Pressione enter para continuar..." << endl;
+    cin.get();
 
     showMenu();
 
