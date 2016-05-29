@@ -50,6 +50,7 @@ struct fatlist_s
     string file_name;
     // Primeiro setor onde o arquivo esta armazenado no HD
     unsigned int first_sector;
+    unsigned long total_bytes;
 };
 
 // Lista dos nomes dos arquivos inseridos
@@ -87,10 +88,11 @@ vector<fatent_s> fatsec;
 void showMenu();
 void clearScreen();
 
-fatlist_s initFatList();
 void initFatSec();
+void insertFatList(const string&, unsigned int);
+void insertFatSec(vector<int>);
 void initCylinder(int);
-void insertBlock(const string&);
+void insertBlock(const string&, const string&);
 
 void writeFile();
 void readFile();

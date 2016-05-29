@@ -27,27 +27,48 @@ int main( int argc, char *argv[] )
     }
     var = oss.str();
 
-    insertBlock(var);
+    initFatSec();
+    insertBlock("text1.txt", var);
 
     //showMenu();  
-        
-    //fatlist *ft = initFatList();
-    //initFatSec();
 
     return 0;
 }
 
-// void insertFatList()
-// {
-//     fatlist_s fl = {file, sector}
-//     fatfiles.push_back(fatlist_s());
-// }
+void initFatSec()
+{
+    fatent_s fs = {-1, -1, -1};
+    for(int i=0; i< 900;++i) fatsec.push_back(fs);
+}
 
-// void insertFatSec()
-// {
-//     fatsec.push_back(NULL);
-//     fatsec[0] = NULL;
-// }
+
+void insertFatList(const string& file, unsigned int sector,  unsigned long bytes)
+{
+    fatlist_s fl = {file, sector, bytes};
+    fatfiles.push_back(fl);
+}
+
+void insertFatSec(vector<int> sectors_it)
+{
+    int i;
+
+    for(i=0;i<sectors_it.size();++i)
+    {
+
+        fatsec[sectors_it[i]].used=1;
+        if(i==sectors_it.size()-1) 
+        {
+            fatsec[sectors_it[i]].eof=1;
+            fatsec[sectors_it[i]].next=-1;
+        }
+        else
+        {
+            fatsec[sectors_it[i]].eof=0;
+            fatsec[sectors_it[i]].next=sectors_it[i+1];
+        }   
+        cout << "index: " << sectors_it[i] << "eof: " << fatsec[sectors_it[i]].eof << endl;
+    }   
+}
 
 // receive index of the cylinder that will be create
 void initCylinder(int index_cy)
@@ -76,6 +97,10 @@ vector<string> stringSector(const string& bytes)
     int ind_string = 0;
     cout << "valor inicial da string: " << aux_s.size() << endl;
 
+    stringstream ss;
+    ss << aux_s.size();
+    sectors.push_back(ss.str());
+
     while(aux_s.size()>512){
         sectors.push_back(aux_s.substr(0,512));
         
@@ -94,51 +119,54 @@ vector<string> stringSector(const string& bytes)
 }
 
 //Alocando no setor
-void insertBlock(const string& bytes)
+void insertBlock(const string& filename, const string& bytes)
 {
     vector<string> sectors;
-    int sec_size, it_size=0;
+    vector<int> vectors_it;
+    int sec_size, it_size=1, iter_sector=-1, next_sector=0;
+    unsigned long total_size;
 
     sectors = stringSector(bytes);
+    stringstream(sectors[0]) >> total_size;
     sec_size = sectors.size();
 
     cout << "tamanho do vetor das strings: " << sec_size << endl;
 
     for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
     {
-            //init cylinder
-            initCylinder(k);
+        //init cylinder
+        initCylinder(k);
 
-        for(int j=0; j<TRACK_SIZE; ++j)
+        for(int j=0; j<TRACK_SIZE && it_size<sec_size; ++j)
         {    
-            for(int i=0; i<CYLINDER_SIZE; ++i)
+            for(int i=0; i<CYLINDER_SIZE && it_size<sec_size; ++i)
             {
+                
                 for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
                 {
                     // sectors available
                     if(cylinder[k].track[i].cluster[j].sector[n].bytes_s == "")
                     {    
+                        // Parallel write on cylinder
+                        iter_sector=n+(60*i)+(4*j);
+                        vectors_it.push_back(iter_sector);
+
                         cout << it_size << endl;
                         cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
+
                         cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
                         cout << "string inserida nos setores: " << cylinder[k].track[i].cluster[j].sector[n].bytes_s << endl;
                     }
                 }
-                
             }
         }
     }
+
+    insertFatSec(vectors_it);
+
+    insertFatList(filename, vectors_it[0], total_size);
+    showFAT();
 }
-
-// return the index of the cluster empty locate at track_array struct
-// int checkClusterEmpty(sector_array *sa)
-// {
-//     int index;
-
-
-
-//     return 
-// }
 
 // Funcao que mostra o menu inicial
 void showMenu()
@@ -195,7 +223,7 @@ void writeFile()
 
     getline(cin, text);
 
-    insertBlock(text);
+    insertBlock(file, text);
 
 
     // TODO : confirmar o texto digitado, caso contrario possibilitar digitar novamente
@@ -224,7 +252,6 @@ void readFile()
     strcat(fileout, file);
     strcat(fileout, ".txt");
 
-
     showMenu();
 
 }
@@ -236,6 +263,29 @@ void delFile()
 
 void showFAT()
 {
+    int j=0;
 
+    cout << "NOME      TAMANHO EM DISCO        LOCALIZAÇÃO" << endl;
+
+    for(int i=0; i < fatfiles.size(); ++i)
+    {
+        cout << fatfiles[i].file_name << "      " << fatfiles[i].total_bytes << " Bytes        ";
+        j = fatfiles[i].first_sector;
+
+        while(fatsec[j].eof!=1)
+        {
+            cout << j << " "; 
+            j = fatsec[j].next;
+        }
+        cout << j << " "; 
+    }
+
+    cout << endl;
+    cout << "Pressione enter para continuar..." << endl;
+    cin.get();
 }
+
+
+
+
 
