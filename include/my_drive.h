@@ -99,3 +99,8 @@ void readFile();
 void delFile();
 void showFAT();
 
+int fileInFAT(string);
+string showFile(int);
+
+
+

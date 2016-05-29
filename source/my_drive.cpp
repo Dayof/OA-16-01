@@ -10,27 +10,27 @@ int main( int argc, char *argv[] )
 {
 
     //test with ./my_drive < db.txt
-    vector <string> v;
-    ostringstream oss;
-    string var;
+    // vector <string> v;
+    // ostringstream oss;
+    // string var;
 
-    copy(istream_iterator<string>(cin),
-        istream_iterator<string>(),
-        back_inserter(v));
+    // copy(istream_iterator<string>(cin),
+    //     istream_iterator<string>(),
+    //     back_inserter(v));
 
-    if (!v.empty())
-    {
-        std::copy(v.begin(), v.end()-1,
-            ostream_iterator<string>(oss, " "));
+    // if (!v.empty())
+    // {
+    //     std::copy(v.begin(), v.end()-1,
+    //         ostream_iterator<string>(oss, " "));
 
-        oss << v.back();
-    }
-    var = oss.str();
+    //     oss << v.back();
+    // }
+    // var = oss.str();
 
     initFatSec();
-    insertBlock("text1.txt", var);
+    // insertBlock("text1.txt", var);
 
-    //showMenu();  
+    showMenu();  
 
     return 0;
 }
@@ -50,14 +50,12 @@ void insertFatList(const string& file, unsigned int sector,  unsigned long bytes
 
 void insertFatSec(vector<int> sectors_it)
 {
-    int i;
-
-    for(i=0;i<sectors_it.size();++i)
+    for(int i=0;i<sectors_it.size();++i)
     {
-
         fatsec[sectors_it[i]].used=1;
-        if(i==sectors_it.size()-1) 
+        if(i==sectors_it.size()-1)
         {
+
             fatsec[sectors_it[i]].eof=1;
             fatsec[sectors_it[i]].next=-1;
         }
@@ -210,11 +208,11 @@ void clearScreen()
 
 void writeFile()
 {
-    size_t num_bytes;
     string text, file, fileout;
 
     // TODO : verificar se ele digitar com .txt na string
     cout << "Informe o nome do arquivo: \n(Até 100 caracteres)" << endl;
+    cin.get();
     getline(cin, file);
     fileout=file + ".txt";
 
@@ -223,8 +221,7 @@ void writeFile()
 
     getline(cin, text);
 
-    insertBlock(file, text);
-
+    insertBlock(fileout, text);
 
     // TODO : confirmar o texto digitado, caso contrario possibilitar digitar novamente
     cout << endl;
@@ -243,17 +240,71 @@ void writeFile()
 
 void readFile()
 {
-    char file[100], fileout[104], text_out[1024];
+    string file, fileout;
+    int f_sector;
 
-    printf("Informe o nome do arquivo:\n");
-    scanf("%101s", file);
-    getchar();
-    
-    strcat(fileout, file);
-    strcat(fileout, ".txt");
+    // TODO : verificar se ele digitar com .txt na string
+    cout << "Informe o nome do arquivo: \n(Até 100 caracteres)" << endl;
+    cin.get();
+    getline(cin, file);
+    fileout=file + ".txt";
+    f_sector = fileInFAT(fileout);
+
+    if(f_sector!=-1)
+    {
+        cout << showFile(f_sector) << endl;
+    }
+    else cout << "Arquivo não existente." << endl;
+
+    cout << "Pressione enter para continuar..." << endl;
+    cin.get();
 
     showMenu();
 
+}
+
+string showFile(int first_sector)
+{
+    string all_file="";
+    int sector, cluster, track, cylind;
+
+    sector=first_sector;
+
+    while(fatsec[sector].eof!=1)
+    {
+        cluster=sector/4;
+        track=cluster/15;
+        cylind=track/5;
+
+        all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector].bytes_s;
+
+        sector = fatsec[sector].next;
+    }
+
+    cluster=sector/4;
+    track=cluster/15;
+    cylind=track/5;
+    all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector].bytes_s;
+
+    return all_file;
+} 
+
+int fileInFAT(string filename)
+{
+    int result = -1;
+
+    for(int i=0; i<fatfiles.size();++i)
+    {
+        cout << "fatfiles: " << fatfiles[i].file_name << endl;
+        cout << "file: " << filename << endl;
+        if(fatfiles[i].file_name == filename)
+        {
+            result = fatfiles[i].first_sector;
+            break;
+        }
+    }
+
+    return result;
 }
 
 void delFile()
