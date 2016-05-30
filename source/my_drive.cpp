@@ -6,19 +6,18 @@ Desenvolvedoras:
 
 #include <my_drive.h>
 
-
 class Coordinate
 {
 public:
-    int k, i, j;
+    int cylinder, track, cluster;
     Coordinate(int cylinder, int track, int cluster);
 };
 
 Coordinate::Coordinate(int cylinder, int track, int cluster)
 {
-    this->k = cylinder;
-    this->j = cluster;
-    this->i = track;
+    this->cylinder = cylinder;
+    this->cluster = cluster;
+    this->track = track;
 }
 
 int main( int argc, char *argv[] )
@@ -35,7 +34,7 @@ int main( int argc, char *argv[] )
 
     if (!v.empty())
     {
-        std::copy(v.begin(), v.end()-1,
+        copy(v.begin(), v.end()-1,
             ostream_iterator<string>(oss, " "));
 
         oss << v.back();
@@ -131,15 +130,13 @@ vector<string> stringSector(const string& bytes)
     return sectors;
 }
 
-Coordinate* searchCluster(int sec_size)
+Coordinate* searchCluster()
 {
-    int it_size=1;
-
-    for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
-    {
-        for(int j=0; j<TRACK_SIZE && it_size<sec_size; ++j)
-        {    
-            for(int i=0; i<CYLINDER_SIZE && it_size<sec_size; ++i)
+    for(int j=0; j<TRACK_SIZE; ++j)
+        { 
+        for(int k=0; k<CYLINDERS; ++k)
+        {  
+            for(int i=0; i<CYLINDER_SIZE; ++i)
             {
                 //cluster available
                 if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") break;
@@ -157,7 +154,6 @@ void insertBlock(const string& filename, const string& bytes)
     int sec_size, it_size=1, iter_sector=-1, next_sector=0;
     unsigned long total_size;
     clock_t t;
-    bool search_mode=true;
 
     sectors = stringSector(bytes);
     stringstream(sectors[0]) >> total_size;
@@ -165,21 +161,16 @@ void insertBlock(const string& filename, const string& bytes)
     
     t=clock();
 
-    //searchCluster(sec_size);
+    Coordinate* empty_cluster = searchCluster();
 
-    for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
+    for(int k=empty_cluster->cylinder; k<CYLINDERS && it_size<sec_size; ++k)
     {
-        for(int j=0; j<TRACK_SIZE && it_size<sec_size; ++j)
+        for(int j=empty_cluster->cluster; j<TRACK_SIZE && it_size<sec_size; ++j)
         {    
-            for(int i=0; i<CYLINDER_SIZE && it_size<sec_size; ++i)
+            for(int i=empty_cluster->track; i<CYLINDER_SIZE && it_size<sec_size; ++i)
             {
                 //cluster available
-                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") 
-                {
-                    if(search_mode) break;
-                    else continue;
-                }
-                else 
+                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") continue;
 
                 for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
                 {
@@ -189,7 +180,6 @@ void insertBlock(const string& filename, const string& bytes)
 
                     //cout << it_size << endl;
                     cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
-                    search_mode=false;
 
                     cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
 
