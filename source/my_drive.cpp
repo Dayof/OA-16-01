@@ -94,13 +94,13 @@ void initCylinder()
     for(int k=0; k<CYLINDERS; ++k)
     {
         cylinder.push_back(track_array());
-        for(int i=0; i<CYLINDER_SIZE; ++i)
+        for(int i=0; i<TRACK_PER_CYLINDER; ++i)
         {
             cylinder[k].track.push_back(cluster_array());
-            for(int j=0; j<TRACK_SIZE; ++j)
+            for(int j=0; j<CLUSTER_PER_TRACK; ++j)
             { 
                 cylinder[k].track[i].cluster.push_back(sector_array());  
-                for(int n=0; n<CLUSTER_SIZE; ++n)
+                for(int n=0; n<SECTOR_PER_CLUSTER; ++n)
                 { 
                     cylinder[k].track[i].cluster[j].sector.push_back(block());
                 }
@@ -132,11 +132,11 @@ vector<string> stringSector(const string& bytes)
 
 Coordinate* searchCluster()
 {
-    for(int j=0; j<TRACK_SIZE; ++j)
+    for(int j=0; j<CLUSTER_PER_TRACK; ++j)
         { 
         for(int k=0; k<CYLINDERS; ++k)
         {  
-            for(int i=0; i<CYLINDER_SIZE; ++i)
+            for(int i=0; i<TRACK_PER_CYLINDER; ++i)
             {
                 //cluster available
                 if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") break;
@@ -165,14 +165,14 @@ void insertBlock(const string& filename, const string& bytes)
 
     for(int k=empty_cluster->cylinder; k<CYLINDERS && it_size<sec_size; ++k)
     {
-        for(int j=empty_cluster->cluster; j<TRACK_SIZE && it_size<sec_size; ++j)
+        for(int j=empty_cluster->cluster; j<CLUSTER_PER_TRACK && it_size<sec_size; ++j)
         {    
-            for(int i=empty_cluster->track; i<CYLINDER_SIZE && it_size<sec_size; ++i)
+            for(int i=empty_cluster->track; i<TRACK_PER_CYLINDER && it_size<sec_size; ++i)
             {
                 //cluster available
                 if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") continue;
 
-                for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
+                for(int n=0; n<SECTOR_PER_CLUSTER && it_size<sec_size; ++n, ++it_size)
                 {
                     // Parallel write on cylinder
                     iter_sector=n+(60*i)+(4*j);

@@ -81,9 +81,9 @@ vector<fatent_s> fatsec;
     #define CLEAR "clear"
 #endif
 
-#define CLUSTER_SIZE 4
-#define TRACK_SIZE 15 
-#define CYLINDER_SIZE 5 
+#define SECTOR_PER_CLUSTER 4
+#define CLUSTER_PER_TRACK 15 
+#define TRACK_PER_CYLINDER 5 
 #define CYLINDERS 10
 
 double CLOCKS_PER_MILI = CLOCKS_PER_SEC / 1000.0;
