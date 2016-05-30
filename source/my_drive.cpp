@@ -51,7 +51,7 @@ int main( int argc, char *argv[] )
         insertBlock("text.txt", var);
     }
 
-    //showMenu();  
+    //showMenu();
 
     return 0;
 }
@@ -84,8 +84,8 @@ void insertFatSec(vector<int> sectors_it)
         {
             fatsec[sectors_it[i]].eof=0;
             fatsec[sectors_it[i]].next=sectors_it[i+1];
-        }   
-    }   
+        }
+    }
 }
 
 // receive index of the cylinder that will be create
@@ -98,10 +98,10 @@ void initCylinder()
         {
             cylinder[k].track.push_back(cluster_array());
             for(int j=0; j<CLUSTER_PER_TRACK; ++j)
-            { 
-                cylinder[k].track[i].cluster.push_back(sector_array());  
+            {
+                cylinder[k].track[i].cluster.push_back(sector_array());
                 for(int n=0; n<SECTOR_PER_CLUSTER; ++n)
-                { 
+                {
                     cylinder[k].track[i].cluster[j].sector.push_back(block());
                 }
             }
@@ -121,7 +121,7 @@ vector<string> stringSector(const string& bytes)
 
     while(aux_s.size()>512){
         sectors.push_back(aux_s.substr(0,512));
-        
+
         ind_string+=512;
         aux_s = bytes.substr(ind_string);
     }
@@ -132,18 +132,20 @@ vector<string> stringSector(const string& bytes)
 
 Coordinate* searchCluster()
 {
-    for(int j=0; j<CLUSTER_PER_TRACK; ++j)
-        { 
+    for(int i=0; i<TRACK_PER_CYLINDER; ++i)
+    {
         for(int k=0; k<CYLINDERS; ++k)
-        {  
-            for(int i=0; i<TRACK_PER_CYLINDER; ++i)
+        {
+            for(int j=0; j<CLUSTER_PER_TRACK; ++j)
             {
                 //cluster available
-                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") break;
-                else return new Coordinate(k,i,j);
+                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s == "")
+                    return new Coordinate(k,i,j);
             }
         }
     }
+
+    return NULL; // HD is full
 }
 
 //Alocando no setor
@@ -158,7 +160,7 @@ void insertBlock(const string& filename, const string& bytes)
     sectors = stringSector(bytes);
     stringstream(sectors[0]) >> total_size;
     sec_size = sectors.size();
-    
+
     t=clock();
 
     Coordinate* empty_cluster = searchCluster();
@@ -166,7 +168,7 @@ void insertBlock(const string& filename, const string& bytes)
     for(int k=empty_cluster->cylinder; k<CYLINDERS && it_size<sec_size; ++k)
     {
         for(int j=empty_cluster->cluster; j<CLUSTER_PER_TRACK && it_size<sec_size; ++j)
-        {    
+        {
             for(int i=empty_cluster->track; i<TRACK_PER_CYLINDER && it_size<sec_size; ++i)
             {
                 //cluster available
@@ -335,7 +337,7 @@ string showFile(int first_sector)
     all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector%4].bytes_s;
 
     return all_file;
-} 
+}
 
 int fileInFAT(string filename)
 {
@@ -371,18 +373,13 @@ void showFAT()
 
         while(fatsec[j].eof!=1)
         {
-            cout << j << " "; 
+            cout << j << " ";
             j = fatsec[j].next;
         }
-        cout << j << " "; 
+        cout << j << " ";
         cout << endl;
     }
 
     cout << "\nPressione enter para continuar..." << endl;
     cin.get();
 }
-
-
-
-
-
