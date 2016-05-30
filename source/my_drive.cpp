@@ -6,31 +6,53 @@ Desenvolvedoras:
 
 #include <my_drive.h>
 
+
+class Coordinate
+{
+public:
+    int k, i, j;
+    Coordinate(int cylinder, int track, int cluster);
+};
+
+Coordinate::Coordinate(int cylinder, int track, int cluster)
+{
+    this->k = cylinder;
+    this->j = cluster;
+    this->i = track;
+}
+
 int main( int argc, char *argv[] )
 {
 
     //test with ./my_drive < db.txt
-    // vector <string> v;
-    // ostringstream oss;
-    // string var;
+    vector <string> v;
+    ostringstream oss;
+    string var;
 
-    // copy(istream_iterator<string>(cin),
-    //     istream_iterator<string>(),
-    //     back_inserter(v));
+    copy(istream_iterator<string>(cin),
+        istream_iterator<string>(),
+        back_inserter(v));
 
-    // if (!v.empty())
-    // {
-    //     std::copy(v.begin(), v.end()-1,
-    //         ostream_iterator<string>(oss, " "));
+    if (!v.empty())
+    {
+        std::copy(v.begin(), v.end()-1,
+            ostream_iterator<string>(oss, " "));
 
-    //     oss << v.back();
-    // }
-    // var = oss.str();
+        oss << v.back();
+    }
+    var = oss.str();
 
+    //init fat list
     initFatSec();
-    // insertBlock("text1.txt", var);
 
-    showMenu();  
+    //init cylinder
+    initCylinder();
+    for(int i=0; i<151;++i)
+    {
+        insertBlock("text.txt", var);
+    }
+
+    //showMenu();  
 
     return 0;
 }
@@ -68,18 +90,21 @@ void insertFatSec(vector<int> sectors_it)
 }
 
 // receive index of the cylinder that will be create
-void initCylinder(int index_cy)
+void initCylinder()
 {
-    cylinder.push_back(track_array());
-    for(int i=0; i<CYLINDER_SIZE; ++i)
+    for(int k=0; k<CYLINDERS; ++k)
     {
-        cylinder[index_cy].track.push_back(cluster_array());
-        for(int j=0; j<TRACK_SIZE; ++j)
-        { 
-            cylinder[index_cy].track[i].cluster.push_back(sector_array());  
-            for(int n=0; n<CLUSTER_SIZE; ++n)
+        cylinder.push_back(track_array());
+        for(int i=0; i<CYLINDER_SIZE; ++i)
+        {
+            cylinder[k].track.push_back(cluster_array());
+            for(int j=0; j<TRACK_SIZE; ++j)
             { 
-                cylinder[index_cy].track[i].cluster[j].sector.push_back(block());
+                cylinder[k].track[i].cluster.push_back(sector_array());  
+                for(int n=0; n<CLUSTER_SIZE; ++n)
+                { 
+                    cylinder[k].track[i].cluster[j].sector.push_back(block());
+                }
             }
         }
     }
@@ -106,6 +131,24 @@ vector<string> stringSector(const string& bytes)
     return sectors;
 }
 
+Coordinate* searchCluster(int sec_size)
+{
+    int it_size=1;
+
+    for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
+    {
+        for(int j=0; j<TRACK_SIZE && it_size<sec_size; ++j)
+        {    
+            for(int i=0; i<CYLINDER_SIZE && it_size<sec_size; ++i)
+            {
+                //cluster available
+                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") break;
+                else return new Coordinate(k,i,j);
+            }
+        }
+    }
+}
+
 //Alocando no setor
 void insertBlock(const string& filename, const string& bytes)
 {
@@ -113,32 +156,40 @@ void insertBlock(const string& filename, const string& bytes)
     vector<int> vectors_it;
     int sec_size, it_size=1, iter_sector=-1, next_sector=0;
     unsigned long total_size;
-    struct timeval stop, start;
+    clock_t t;
+    bool search_mode=true;
 
     sectors = stringSector(bytes);
     stringstream(sectors[0]) >> total_size;
     sec_size = sectors.size();
     
-    gettimeofday(&start, NULL);
+    t=clock();
+
+    //searchCluster(sec_size);
+
     for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
     {
-        //init cylinder
-        initCylinder(k);
-
         for(int j=0; j<TRACK_SIZE && it_size<sec_size; ++j)
         {    
             for(int i=0; i<CYLINDER_SIZE && it_size<sec_size; ++i)
             {
                 //cluster available
-                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") break;
+                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") 
+                {
+                    if(search_mode) break;
+                    else continue;
+                }
+                else 
+
                 for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
                 {
                     // Parallel write on cylinder
                     iter_sector=n+(60*i)+(4*j);
                     vectors_it.push_back(iter_sector);
 
-                    cout << it_size << endl;
+                    //cout << it_size << endl;
                     cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
+                    search_mode=false;
 
                     cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
 
@@ -151,15 +202,16 @@ void insertBlock(const string& filename, const string& bytes)
 
     insertFatList(filename, vectors_it[0], total_size);
 
-    gettimeofday(&stop, NULL);
-    showTime(start,stop);
+    t = clock()-t;
+
+    showTime(t);
+
     showFAT();
 }
 
-void showTime(struct timeval start, struct timeval stop)
+void showTime(clock_t t)
 {
-    double elapsed_secs = double(stop.tv_usec - start.tv_usec);
-    cout << "elapsed miliseconds" << elapsed_secs << endl;
+    cout << "elapsed seconds: " << t / CLOCKS_PER_MILI << endl;
     cin.get();
 }
 
@@ -236,6 +288,7 @@ void readFile()
 {
     string file, fileout;
     int f_sector;
+    clock_t t;
 
     // TODO : verificar se ele digitar com .txt na string
     cout << "Informe o nome do arquivo: \n(Até 100 caracteres)" << endl;
@@ -246,7 +299,10 @@ void readFile()
 
     if(f_sector!=-1)
     {
+        t=clock();
         cout << showFile(f_sector) << endl;
+        t=clock()-t;
+        showTime(t);
         writeFileHD(showFile(f_sector));
     }
     else cout << "Arquivo não existente." << endl;
@@ -332,8 +388,7 @@ void showFAT()
         cout << endl;
     }
 
-    cout << endl;
-    cout << "Pressione enter para continuar..." << endl;
+    cout << "\nPressione enter para continuar..." << endl;
     cin.get();
 }
 

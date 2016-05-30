@@ -8,7 +8,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
-#include <sys/time.h>
+#include <ctime>
 
 using namespace std;
 
@@ -86,6 +86,8 @@ vector<fatent_s> fatsec;
 #define CYLINDER_SIZE 5 
 #define CYLINDERS 10
 
+double CLOCKS_PER_MILI = CLOCKS_PER_SEC / 1000.0;
+
 // ASSINATURAS DAS FUNCOES
 void showMenu();
 void clearScreen();
@@ -93,7 +95,7 @@ void clearScreen();
 void initFatSec();
 void insertFatList(const string&, unsigned int);
 void insertFatSec(vector<int>);
-void initCylinder(int);
+void initCylinder();
 void insertBlock(const string&, const string&);
 
 void writeFile();
@@ -104,7 +106,7 @@ void showFAT();
 int fileInFAT(string);
 string showFile(int);
 void writeFileHD(string);
-void showTime(struct timeval, struct timeval);
+void showTime(clock_t);
 
 
 
