@@ -156,6 +156,7 @@ void insertBlock(const string& filename, const string& bytes)
     int sec_size, it_size=1, iter_sector=-1, next_sector=0;
     unsigned long total_size;
     clock_t t;
+    Coordinate* empty_cluster;
 
     sectors = stringSector(bytes);
     stringstream(sectors[0]) >> total_size;
@@ -163,7 +164,7 @@ void insertBlock(const string& filename, const string& bytes)
 
     t=clock();
 
-    Coordinate* empty_cluster = searchCluster();
+    empty_cluster = searchCluster();
 
     for(int k=empty_cluster->cylinder; k<CYLINDERS && it_size<sec_size; ++k)
     {
@@ -171,7 +172,7 @@ void insertBlock(const string& filename, const string& bytes)
         {
             for(int i=empty_cluster->track; i<TRACK_PER_CYLINDER && it_size<sec_size; ++i)
             {
-                //cluster available
+                //if cluster is not available
                 if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") continue;
 
                 for(int n=0; n<SECTOR_PER_CLUSTER && it_size<sec_size; ++n, ++it_size)
