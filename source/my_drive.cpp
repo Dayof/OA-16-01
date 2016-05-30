@@ -10,8 +10,16 @@ class Coordinate
 {
 public:
     int cylinder, track, cluster;
+    void empty();
     Coordinate(int cylinder, int track, int cluster);
 };
+
+void Coordinate::empty()
+{
+    this->cylinder = 0;
+    this->track = 0;
+    this->cluster = 0;
+}
 
 Coordinate::Coordinate(int cylinder, int track, int cluster)
 {
@@ -166,12 +174,19 @@ void insertBlock(const string& filename, const string& bytes)
 
     empty_cluster = searchCluster();
 
+    if(!empty_cluster)
+    {
+        cout << "Hard Drive is full. Please free some space before writing again.";
+        return;
+    }
+
     for(int k=empty_cluster->cylinder; k<CYLINDERS && it_size<sec_size; ++k)
     {
         for(int j=empty_cluster->cluster; j<CLUSTER_PER_TRACK && it_size<sec_size; ++j)
         {
             for(int i=empty_cluster->track; i<TRACK_PER_CYLINDER && it_size<sec_size; ++i)
             {
+                empty_cluster->empty();
                 //if cluster is not available
                 if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") continue;
 
