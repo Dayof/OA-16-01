@@ -64,7 +64,6 @@ void insertFatSec(vector<int> sectors_it)
             fatsec[sectors_it[i]].eof=0;
             fatsec[sectors_it[i]].next=sectors_it[i+1];
         }   
-        cout << "index: " << sectors_it[i] << "eof: " << fatsec[sectors_it[i]].eof << endl;
     }   
 }
 
@@ -93,7 +92,6 @@ vector<string> stringSector(const string& bytes)
     vector<string> sectors;
     string aux_s(bytes);
     int ind_string = 0;
-    cout << "valor inicial da string: " << aux_s.size() << endl;
 
     stringstream ss;
     ss << aux_s.size();
@@ -106,12 +104,6 @@ vector<string> stringSector(const string& bytes)
         aux_s = bytes.substr(ind_string);
     }
     sectors.push_back(aux_s);
-
-    for(int i=0;i<sectors.size();++i){
-        cout << "bytes string inserida: " << sectors[i].size() << endl;
-        cout << "string " << i << ": " << sectors[i] << endl;
-    }
-        
 
     return sectors;
 }
@@ -128,8 +120,6 @@ void insertBlock(const string& filename, const string& bytes)
     stringstream(sectors[0]) >> total_size;
     sec_size = sectors.size();
 
-    cout << "tamanho do vetor das strings: " << sec_size << endl;
-
     for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
     {
         //init cylinder
@@ -139,22 +129,19 @@ void insertBlock(const string& filename, const string& bytes)
         {    
             for(int i=0; i<CYLINDER_SIZE && it_size<sec_size; ++i)
             {
-                
+                //cluster available
+                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") break;
                 for(int n=0; n<CLUSTER_SIZE && it_size<sec_size; ++n, ++it_size)
                 {
-                    // sectors available
-                    if(cylinder[k].track[i].cluster[j].sector[n].bytes_s == "")
-                    {    
-                        // Parallel write on cylinder
-                        iter_sector=n+(60*i)+(4*j);
-                        vectors_it.push_back(iter_sector);
+                    // Parallel write on cylinder
+                    iter_sector=n+(60*i)+(4*j);
+                    vectors_it.push_back(iter_sector);
 
-                        cout << it_size << endl;
-                        cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
+                    cout << it_size << endl;
+                    cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
 
-                        cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
-                        cout << "string inserida nos setores: " << cylinder[k].track[i].cluster[j].sector[n].bytes_s << endl;
-                    }
+                    cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
+
                 }
             }
         }
@@ -194,6 +181,7 @@ void showMenu()
             printf("Saindo..\n");
             break;
         default:
+            cin.get();
             printf("Opção inválida, digite novamente\n");
             sleep(1);
             showMenu();
@@ -269,14 +257,14 @@ string showFile(int first_sector)
     int sector, cluster, track, cylind;
 
     sector=first_sector;
+    cout << "first_sector: " << first_sector << endl;
 
     while(fatsec[sector].eof!=1)
     {
         cluster=sector/4;
         track=cluster/15;
         cylind=track/5;
-
-        all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector].bytes_s;
+        all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector%4].bytes_s;
 
         sector = fatsec[sector].next;
     }
@@ -284,7 +272,7 @@ string showFile(int first_sector)
     cluster=sector/4;
     track=cluster/15;
     cylind=track/5;
-    all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector].bytes_s;
+    all_file=all_file+cylinder[cylind].track[track].cluster[cluster].sector[sector%4].bytes_s;
 
     return all_file;
 } 
@@ -295,8 +283,6 @@ int fileInFAT(string filename)
 
     for(int i=0; i<fatfiles.size();++i)
     {
-        cout << "fatfiles: " << fatfiles[i].file_name << endl;
-        cout << "file: " << filename << endl;
         if(fatfiles[i].file_name == filename)
         {
             result = fatfiles[i].first_sector;
@@ -329,6 +315,7 @@ void showFAT()
             j = fatsec[j].next;
         }
         cout << j << " "; 
+        cout << endl;
     }
 
     cout << endl;
