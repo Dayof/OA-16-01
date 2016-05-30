@@ -83,8 +83,6 @@ void initCylinder(int index_cy)
             }
         }
     }
-
-    
 }
 
 vector<string> stringSector(const string& bytes)
@@ -241,6 +239,7 @@ void readFile()
     if(f_sector!=-1)
     {
         cout << showFile(f_sector) << endl;
+        writeFileHD(showFile(f_sector));
     }
     else cout << "Arquivo não existente." << endl;
 
@@ -251,13 +250,20 @@ void readFile()
 
 }
 
+void writeFileHD(string text)
+{
+    ofstream file;
+    file.open("SAIDA.txt");
+    file << text;
+    file.close();
+}
+
 string showFile(int first_sector)
 {
     string all_file="";
     int sector, cluster, track, cylind;
 
     sector=first_sector;
-    cout << "first_sector: " << first_sector << endl;
 
     while(fatsec[sector].eof!=1)
     {

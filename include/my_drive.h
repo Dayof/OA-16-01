@@ -4,6 +4,7 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <sstream>
 #include <iterator>
@@ -101,6 +102,7 @@ void showFAT();
 
 int fileInFAT(string);
 string showFile(int);
+void writeFileHD(string);
 
 
 
