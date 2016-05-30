@@ -38,7 +38,7 @@ int main( int argc, char *argv[] )
 void initFatSec()
 {
     fatent_s fs = {-1, -1, -1};
-    for(int i=0; i< 900;++i) fatsec.push_back(fs);
+    for(int i=0; i< 3000;++i) fatsec.push_back(fs);
 }
 
 
@@ -113,11 +113,13 @@ void insertBlock(const string& filename, const string& bytes)
     vector<int> vectors_it;
     int sec_size, it_size=1, iter_sector=-1, next_sector=0;
     unsigned long total_size;
+    struct timeval stop, start;
 
     sectors = stringSector(bytes);
     stringstream(sectors[0]) >> total_size;
     sec_size = sectors.size();
-
+    
+    gettimeofday(&start, NULL);
     for(int k=0; k<CYLINDERS && it_size<sec_size; ++k)
     {
         //init cylinder
@@ -148,7 +150,17 @@ void insertBlock(const string& filename, const string& bytes)
     insertFatSec(vectors_it);
 
     insertFatList(filename, vectors_it[0], total_size);
+
+    gettimeofday(&stop, NULL);
+    showTime(start,stop);
     showFAT();
+}
+
+void showTime(struct timeval start, struct timeval stop)
+{
+    double elapsed_secs = double(stop.tv_usec - start.tv_usec);
+    cout << "elapsed miliseconds" << elapsed_secs << endl;
+    cin.get();
 }
 
 // Funcao que mostra o menu inicial
@@ -158,8 +170,8 @@ void showMenu()
     int op;
 
     clearScreen();
-    printf("1 - Escrever Arquivo\n2 - Ler Arquivo\n3 - Apagar Arquivo\n4 - Mostrar Tabela FAT\n5 - Sair\n");
-    scanf("%d", &op);
+    cout << "1 - Escrever Arquivo\n2 - Ler Arquivo\n3 - Apagar Arquivo\n4 - Mostrar Tabela FAT\n5 - Sair" << endl;
+    cin >> op;
 
     switch(op)
     {
@@ -180,7 +192,7 @@ void showMenu()
             break;
         default:
             cin.get();
-            printf("Opção inválida, digite novamente\n");
+            cout << "Opção inválida, digite novamente" << endl;
             sleep(1);
             showMenu();
     }
@@ -202,18 +214,14 @@ void writeFile()
     getline(cin, file);
     fileout=file + ".txt";
 
-    cout << "ESCREVA ABAIXO\nQUANDO TERMINAR DE DIGITAR PRESSIONE A TECLA ENTER PARA GRAVAR NO ARQUIVO" << endl;
-    cout << endl;
+    cout << "ESCREVA ABAIXO\nQUANDO TERMINAR DE DIGITAR PRESSIONE A TECLA ENTER PARA GRAVAR NO ARQUIVO\n" << endl;
 
     getline(cin, text);
 
     insertBlock(fileout, text);
 
     // TODO : confirmar o texto digitado, caso contrario possibilitar digitar novamente
-    cout << endl;
-    cout << endl;
-    cout << "TEXTO DIGITADO" << endl;
-    cout << endl;
+    cout << "\n\nTEXTO DIGITADO\n" << endl;
 
     cout << text << endl;
 

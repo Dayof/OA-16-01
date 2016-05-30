@@ -8,6 +8,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -83,7 +84,7 @@ vector<fatent_s> fatsec;
 #define CLUSTER_SIZE 4
 #define TRACK_SIZE 15 
 #define CYLINDER_SIZE 5 
-#define CYLINDERS 3 
+#define CYLINDERS 10
 
 // ASSINATURAS DAS FUNCOES
 void showMenu();
@@ -103,6 +104,7 @@ void showFAT();
 int fileInFAT(string);
 string showFile(int);
 void writeFileHD(string);
+void showTime(struct timeval, struct timeval);
 
 
 
