@@ -1,7 +1,7 @@
 /* Trabalho de OA 2016/01
 Desenvolvedoras:
 1. Dayanne Fernandes da Cunha - 13/0107191
-2.
+2. Rafaella dos Reis Santos - 14/0159932
 */
 
 #include <my_drive.h>
@@ -30,43 +30,40 @@ Coordinate::Coordinate(int cylinder, int track, int cluster)
 
 int main( int argc, char *argv[] )
 {
-
-    //test with ./my_drive < db.txt
-    vector <string> v;
-    ostringstream oss;
-    string var;
-
-    copy(istream_iterator<string>(cin),
-        istream_iterator<string>(),
-        back_inserter(v));
-
-    if (!v.empty())
-    {
-        copy(v.begin(), v.end()-1,
-            ostream_iterator<string>(oss, " "));
-
-        oss << v.back();
-    }
-    var = oss.str();
-
     //init fat list
     initFatSec();
 
     //init cylinder
     initCylinder();
-    for(int i=0; i<151;++i)
-    {
-        insertBlock("text.txt", var);
-    }
+    
+    showMenu();
 
-    //showMenu();
+    //test with ./my_drive < db.txt
+    // vector <string> v;
+    // ostringstream oss;
+    // string var;
+
+    // copy(istream_iterator<string>(cin),
+    //     istream_iterator<string>(),
+    //     back_inserter(v));
+
+    // if (!v.empty())
+    // {
+    //     copy(v.begin(), v.end()-1,
+    //         ostream_iterator<string>(oss, " "));
+
+    //     oss << v.back();
+    // }
+    // var = oss.str();
+    
+    // for(int i=0; i<151;++i) insertBlock("text.txt", var);
 
     return 0;
 }
 
 void initFatSec()
 {
-    fatent_s fs = {-1, -1, -1};
+    fatent_s fs = {0, 0, -1};
     for(int i=0; i< 3000;++i) fatsec.push_back(fs);
 }
 
@@ -84,15 +81,10 @@ void insertFatSec(vector<int> sectors_it)
         fatsec[sectors_it[i]].used=1;
         if(i==sectors_it.size()-1)
         {
-
             fatsec[sectors_it[i]].eof=1;
             fatsec[sectors_it[i]].next=-1;
         }
-        else
-        {
-            fatsec[sectors_it[i]].eof=0;
-            fatsec[sectors_it[i]].next=sectors_it[i+1];
-        }
+        else fatsec[sectors_it[i]].next=sectors_it[i+1];
     }
 }
 
@@ -146,14 +138,21 @@ Coordinate* searchCluster()
         {
             for(int j=0; j<CLUSTER_PER_TRACK; ++j)
             {
-                //cluster available
-                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s == "")
+                if(clusterAvailable(k,i,j))
                     return new Coordinate(k,i,j);
             }
         }
     }
 
     return NULL; // HD is full
+}
+
+bool clusterAvailable(int cylinder, int track, int cluster)
+{
+    int sector=(300*cylinder)+(60*track)+(4*cluster), result = false;
+    if(fatsec[sector].used==0) result = true;
+
+    return result;
 }
 
 //Alocando no setor
@@ -188,18 +187,18 @@ void insertBlock(const string& filename, const string& bytes)
             {
                 empty_cluster->empty();
                 //if cluster is not available
-                if(cylinder[k].track[i].cluster[j].sector[0].bytes_s != "") continue;
+                if(!clusterAvailable(k,i,j)) continue;
 
                 for(int n=0; n<SECTOR_PER_CLUSTER && it_size<sec_size; ++n, ++it_size)
                 {
                     // Parallel write on cylinder
-                    iter_sector=n+(60*i)+(4*j);
+                    iter_sector=n+(300*k)+(60*i)+(4*j);
                     vectors_it.push_back(iter_sector);
 
                     //cout << it_size << endl;
                     cylinder[k].track[i].cluster[j].sector[n].bytes_s = sectors[it_size];
 
-                    cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
+                    //cout << "setor: " << n << " cluster: " << j << " trilha: " << i << " cilindro: " << k << endl;
 
                 }
             }
@@ -214,7 +213,7 @@ void insertBlock(const string& filename, const string& bytes)
 
     showTime(t);
 
-    showFAT();
+    //showFAT();
 }
 
 void showTime(clock_t t)
@@ -269,7 +268,7 @@ void writeFile()
     string text, file, fileout;
 
     // TODO : verificar se ele digitar com .txt na string
-    cout << "Informe o nome do arquivo: \n(Até 100 caracteres)" << endl;
+    cout << "Informe o nome do arquivo:" << endl;
     cin.get();
     getline(cin, file);
     fileout=file + ".txt";
@@ -299,7 +298,7 @@ void readFile()
     clock_t t;
 
     // TODO : verificar se ele digitar com .txt na string
-    cout << "Informe o nome do arquivo: \n(Até 100 caracteres)" << endl;
+    cout << "Informe o nome do arquivo:" << endl;
     cin.get();
     getline(cin, file);
     fileout=file + ".txt";
@@ -339,6 +338,7 @@ string showFile(int first_sector)
 
     while(fatsec[sector].eof!=1)
     {
+        sector=sector%300;
         cluster=sector/4;
         track=cluster/15;
         cylind=track/5;
@@ -347,6 +347,7 @@ string showFile(int first_sector)
         sector = fatsec[sector].next;
     }
 
+    sector=sector%300;
     cluster=sector/4;
     track=cluster/15;
     cylind=track/5;
@@ -371,9 +372,73 @@ int fileInFAT(string filename)
     return result;
 }
 
+bool delFileInFAT(int f_sector, string filename)
+{
+    bool result = false;
+    int j, aux_j;
+
+    j = f_sector;
+
+    try
+    {
+        while(fatsec[j].eof!=1)
+        {
+            fatsec[j].used=0;
+            fatsec[j].eof=0;
+            aux_j = fatsec[j].next;
+            fatsec[j].next=-1;
+            j = aux_j;
+        }
+
+        fatsec[j].used=0;
+        fatsec[j].eof=0;
+        aux_j = fatsec[j].next;
+        fatsec[j].next=-1;
+        j = aux_j;
+
+        for(int i=0; i<fatfiles.size();++i)
+        {
+            if(fatfiles[i].file_name == filename)
+            {
+                fatfiles.erase(fatfiles.begin()+i);
+                result = true;
+                break;
+            }
+        }
+    }
+    catch (exception& e)
+    {
+        cerr << "Exception catched : " << e.what() << endl;
+        result = false;
+    }
+
+    return result;
+}
+
 void delFile()
 {
+    string file, fileout;
+    int f_sector;
+    clock_t t;
 
+    // TODO : verificar se ele digitar com .txt na string
+    cout << "Informe o nome do arquivo:" << endl;
+    cin.get();
+    getline(cin, file);
+    fileout=file + ".txt";
+    f_sector = fileInFAT(fileout);
+
+    if(f_sector!=-1)
+    {
+        if(delFileInFAT(f_sector,fileout)) cout << "Arquivo deletado com sucesso!" << endl;
+        else cout << "Ocorreu algum erro na deleção." << endl;
+    }
+    else cout << "Arquivo não existente." << endl;
+
+    cout << "Pressione enter para continuar..." << endl;
+    cin.get();
+
+    showMenu();
 }
 
 void showFAT()

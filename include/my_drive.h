@@ -104,9 +104,11 @@ void delFile();
 void showFAT();
 
 int fileInFAT(string);
+bool delFileInFAT(int, string);
 string showFile(int);
 void writeFileHD(string);
 void showTime(clock_t);
+bool clusterAvailable(int, int, int);
 
 
 
