@@ -212,8 +212,6 @@ void insertBlock(const string& filename, const string& bytes)
     t = clock()-t;
 
     showTime(t);
-
-    //showFAT();
 }
 
 void showTime(clock_t t)
@@ -267,11 +265,22 @@ void writeFile()
 {
     string text, file, fileout;
 
-    // TODO : verificar se ele digitar com .txt na string
-    cout << "Informe o nome do arquivo:" << endl;
-    cin.get();
-    getline(cin, file);
-    fileout=file + ".txt";
+    while(true)
+    {
+        // TODO : verificar se ele digitar com .txt na string
+        cout << "Informe o nome do arquivo:" << endl;
+        cin.get();
+        getline(cin, file);
+        fileout=file + ".txt";
+
+        if(fileInFAT(fileout)!=-1)
+        {
+            cout << "Arquivo já existe no HD. "<< endl;
+            cout << "Pressione enter para continuar..." << endl;
+            cin.get();
+        } 
+        else break;   
+    }
 
     cout << "ESCREVA ABAIXO\nQUANDO TERMINAR DE DIGITAR PRESSIONE A TECLA ENTER PARA GRAVAR NO ARQUIVO\n" << endl;
 
@@ -293,7 +302,7 @@ void writeFile()
 
 void readFile()
 {
-    string file, fileout;
+    string file, fileout, str_file;
     int f_sector;
     clock_t t;
 
@@ -307,9 +316,11 @@ void readFile()
     if(f_sector!=-1)
     {
         t=clock();
-        cout << showFile(f_sector) << endl;
+        str_file = showFile(f_sector);
         t=clock()-t;
         showTime(t);
+
+        cout << str_file << endl;
         writeFileHD(showFile(f_sector));
     }
     else cout << "Arquivo não existente." << endl;
@@ -449,7 +460,7 @@ void showFAT()
 
     for(int i=0; i < fatfiles.size(); ++i)
     {
-        cout << fatfiles[i].file_name << "      " << fatfiles[i].total_bytes << " Bytes        ";
+        cout << fatfiles[i].file_name << "      " << fatfiles[i].total_bytes << " Bytes                 ";
         j = fatfiles[i].first_sector;
 
         while(fatsec[j].eof!=1)
@@ -457,10 +468,14 @@ void showFAT()
             cout << j << " ";
             j = fatsec[j].next;
         }
+
         cout << j << " ";
         cout << endl;
     }
 
+    cin.get();
     cout << "\nPressione enter para continuar..." << endl;
     cin.get();
+    
+    showMenu();
 }
