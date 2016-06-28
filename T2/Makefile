@@ -22,7 +22,10 @@ all: index system
 index: $(INDEX_TARGET)
 system: $(SYSTEM_TARGET)
 
-$(OBJ_DIR)/%.o: $(SOURCE_INDEX) $(SOURCE_SYSTEM) $(DEPS)
+$(OBJ_INDEX): $(SOURCE_INDEX) $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(OBJ_SYSTEM): $(SOURCE_SYSTEM) $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(INDEX_TARGET): $(OBJ_INDEX)
@@ -34,4 +37,4 @@ $(SYSTEM_TARGET): $(OBJ_SYSTEM)
 .PHONY: clean
 
 clean:
-	rm -f $(OBJ) $(INDEX_TARGET) $(SYSTEM_TARGET)
+	rm -f $(OBJ_INDEX) $(OBJ_SYSTEM) $(INDEX_TARGET) $(SYSTEM_TARGET)
