@@ -7,17 +7,16 @@ CFLAGS=-I$(INCLUDE_DIR)/
 
 LIBS=-lm
 
-_DEPS=Unb_system.hpp
+_DEPS=inc_system.hpp
 DEPS=$(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
 
-_OBJ=Unb_system.o
+_OBJ=gera_index.o
 OBJ=$(patsubst %,$(OBJ_DIR)/%,$(_OBJ))
 
-_SOURCE=Unb_system.cpp
+_SOURCE=gera_index.cpp
 SOURCE=$(patsubst %,$(SOURCE_DIR)/%,$(_SOURCE))
 
-TARGET=Unb_system
-
+TARGET=gera_index
 
 $(OBJ_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
