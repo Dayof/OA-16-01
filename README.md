@@ -1,5 +1,5 @@
 # Organização de Arquivos
 
-Professor: André Drummond
-Turma: A
+Professor: André Drummond <br />
+Turma: A <br />
 Semestre: 2016/1
