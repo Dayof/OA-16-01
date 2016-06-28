@@ -7,24 +7,31 @@ CFLAGS=-I$(INCLUDE_DIR)/
 
 LIBS=-lm
 
-_DEPS=inc_system.hpp
-DEPS=$(patsubst %,$(INCLUDE_DIR)/%,$(_DEPS))
+DEPS=$(patsubst %,$(INCLUDE_DIR)/%,inc_system.hpp)
 
-_OBJ=gera_index.o
-OBJ=$(patsubst %,$(OBJ_DIR)/%,$(_OBJ))
+OBJ_INDEX=$(patsubst %,$(OBJ_DIR)/%,gera_index.o)
+OBJ_SYSTEM=$(patsubst %,$(OBJ_DIR)/%,Unb_system.o)
 
-_SOURCE=gera_index.cpp
-SOURCE=$(patsubst %,$(SOURCE_DIR)/%,$(_SOURCE))
+SOURCE_INDEX=$(patsubst %,$(SOURCE_DIR)/%,gera_index.cpp)
+SOURCE_SYSTEM=$(patsubst %,$(SOURCE_DIR)/%,Unb_system.cpp)
 
-TARGET=gera_index
+INDEX_TARGET=gera_index
+SYSTEM_TARGET=Unb_system
 
-$(OBJ_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(DEPS)
+all: index system
+index: $(INDEX_TARGET)
+system: $(SYSTEM_TARGET)
+
+$(OBJ_DIR)/%.o: $(SOURCE_INDEX) $(SOURCE_SYSTEM) $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(TARGET): $(OBJ)
+$(INDEX_TARGET): $(OBJ_INDEX)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(SYSTEM_TARGET): $(OBJ_SYSTEM)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(INDEX_TARGET) $(SYSTEM_TARGET)
