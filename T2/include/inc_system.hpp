@@ -5,3 +5,4 @@
 using namespace std;
 
 bool checkList(vector<string>);
+void createFiles(vector<string>);
