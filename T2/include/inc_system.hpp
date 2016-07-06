@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <utility>
+#include <string>
 
 #define TAMFIXO 24
 // byte offset = RRN * TAMFIXO
