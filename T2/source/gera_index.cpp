@@ -66,8 +66,8 @@ void createFiles(vector<string> files)
 
   InvertIndex II1("sec_lista1.txt"), II2("sec_lista2.txt"), II3("sec_lista3.txt");
   II1.createII(files, 1);
-  //II2.createII(files, 2);
-  //II3.createII(files, 3);
+  II2.createII(files, 2);
+  II3.createII(files, 3);
 }
 
 void PrimaryIndex::createPI(vector<string> files, int indexFile)
@@ -147,20 +147,20 @@ void InvertIndex::createII(vector<string> files, int indexFile)
       while(benchmark >> id >> number >> name)
       {
         benchmark.ignore(256, '\n');
-        // cout << name << endl;
-        // getchar();
         this->insertOrdered(pkList, i, name);
         ++i;
       }
-    // else
-    //   // dynamic file
-    //   while(getline(benchmark,id,'|'))
-    //   {
-    //     benchmark.ignore(256, '\n');
-    //     pair<string,int> p(id,i);
-    //     this->insertOrdered(indexList, p);
-    //     ++i;
-    //   }
+    else
+      // dynamic file
+      while(!benchmark.eof())
+      {
+        getline(benchmark,id,'|');
+        getline(benchmark,number,'|');
+        getline(benchmark,name,'|');
+        benchmark.ignore(256, '\n');
+        this->insertOrdered(pkList, i, name);
+        ++i;
+      }
   }
 
   for(int j=0; j<pkList.size(); ++j)
@@ -211,11 +211,6 @@ void InvertIndex::insertOrdered(vector<pair<string, vector<int> > > &pkList, int
       pkList.push_back(aux);
     }
   }
-
-  // cout << pkList.back().first << endl;
-  // this->printVectorSec(pkList.back().second);
-  // cout << endl;
-  // getchar();
 }
 
 void InvertIndex::insertOrderedInvertList(vector<int> &nameList, int rrn)

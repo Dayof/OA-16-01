@@ -1,0 +1,19 @@
+Danilo 0 15 
+Erika 1 22 
+Rogerio 2 
+Leonardo 3 
+Ana Luisa 4 12 23 
+Bruno 5 13 
+Igor 6 25 
+Marcio 7 26 
+Tiago 8 9 28 
+Alberto 10 21 
+Andreza 11 
+Daniel 14 
+Vitor 16 
+Clarice 17 
+Lucas 18 
+Ana Paula 19 
+Carlos 20 
+Fabricio 24 
+Thiago 27 
