@@ -59,9 +59,8 @@ void createFiles(vector<string> files)
 {
   PrimaryIndex PI1("index_lista1.txt"), PI2("index_lista2.txt"), PI3("index_lista3.txt");
   PI1.createPI(files, 1);
-  //TODO delimit pipe |
-  //PI2.createPI(files, 2);
-  //PI3.createPI(files, 3);
+  PI2.createPI(files, 2);
+  PI3.createPI(files, 3);
 
   // InvertIndex II1("sec_lista1.txt"), II2("sec_lista2.txt"), II3("sec_lista3.txt");
   // II1.createII();
@@ -81,13 +80,24 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
   benchmark.open(files[indexFile]);
 
   if(index.is_open() && benchmark.is_open())
-    while(benchmark >> id)
-    {
-      benchmark.ignore(256, '\n');
-      pair<string,int> p(id,i);
-      this->insertOrdered(indexList, p);
-      ++i;
-    }
+  {
+    if(indexFile==1)
+      while(benchmark >> id)
+      {
+        benchmark.ignore(256, '\n');
+        pair<string,int> p(id,i);
+        this->insertOrdered(indexList, p);
+        ++i;
+      }
+    else
+      while(getline(benchmark,id,'|'))
+      {
+        benchmark.ignore(256, '\n');
+        pair<string,int> p(id,i);
+        this->insertOrdered(indexList, p);
+        ++i;
+      }
+  }
 
   for(int j=0; j<indexList.size(); ++j)
     index << indexList[j].first << " " << indexList[j].second << endl;
