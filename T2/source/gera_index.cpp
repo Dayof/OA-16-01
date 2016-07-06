@@ -1,12 +1,11 @@
 #include <inc_system.hpp>
 
-
 class PrimaryIndex
 {
 public:
   PrimaryIndex(string f){filename = f;};
   void createPI(vector<string>, int);
-  // void insert(string);
+  void insertOrdered(vector<pair<string,int> > &, pair<string,int>);
   // void remove(string);
   // void search(string);
   // void print();
@@ -74,7 +73,8 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
 {
   ofstream index;
   ifstream benchmark;
-  string id;
+  string id, line;
+  vector<pair<string,int> > indexList;
   int i=0;
 
   index.open(this->filename);
@@ -83,13 +83,32 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
   if(index.is_open() && benchmark.is_open())
     while(benchmark >> id)
     {
-      index << id << " " << i << endl;
       benchmark.ignore(256, '\n');
+      pair<string,int> p(id,i);
+      this->insertOrdered(indexList, p);
       ++i;
     }
 
+  for(int j=0; j<indexList.size(); ++j)
+    index << indexList[j].first << " " << indexList[j].second << endl;
+
   index.close();
   benchmark.close();
+}
+
+void PrimaryIndex::insertOrdered(vector<pair<string,int> > &indexList, pair<string,int> id)
+{
+  vector<pair<string,int> >::iterator it = indexList.end()-1;
+  pair<string,int> aux;
+
+  if(indexList.empty()) indexList.push_back(id);
+  else if((*it).first>id.first)
+  {
+    while((*it).first>id.first) --it;
+    aux=*it;
+    indexList.insert(it+1,id);
+  }
+  else indexList.push_back(id);
 }
 
 void InvertIndex::createII(vector<string> files, int indexFile)
