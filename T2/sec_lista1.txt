@@ -1,0 +1,22 @@
+Leonardo 0 25 
+Andreza 1 26 
+Rogerio 2 27 
+Ana 3 22 28 46 
+Bruno 4 29 
+Daniel 5 30 
+Danilo 6 31 
+Erika 7 
+Fabricio 8 32 
+Igor 9 33 
+Marcio 10 34 
+Rodrigo 11 35 
+Thiago 12 36 
+Tiago 13 14 37 38 
+Vitor 15 16 17 39 40 41 
+Paulo 18 42 
+Lisa 19 43 
+Clarice 20 44 
+Lucas 21 45 
+Carlos 23 47 
+Alberto 24 48 
+Nolberto 49 
