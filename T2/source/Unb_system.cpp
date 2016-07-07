@@ -493,23 +493,36 @@ void StudentManagement::gradingStudent()
     }
   } while(incorrect);
 
-  if(disc==1) pos_student2=this->searchStudentInPkIndex2(id);
-  else pos_student3=this->searchStudentInPkIndex3(id);
-
-  if(pos_student2>=0)
+  if(disc==1)
   {
-    pos_student2=this->indexListPRR2[pos_student2].second;
-    if(this->gradStudentDisc(pos_student2, 1, grad))
+    pos_student2=this->searchStudentInPkIndex2(id);
+    if(pos_student2>=0)
+    {
+      pos_student2=this->indexListPRR2[pos_student2].second;
+      if(this->gradStudentDisc(pos_student2, 1, grad))
+        cout << "Nota gravada com sucesso." << endl;
+    }
+    else
+    {
+      this->gradNewStudentDisc(pos_student1, 1, grad);
       cout << "Nota gravada com sucesso." << endl;
+    }
   }
-  else if(this->gradNewStudentDisc(pos_student1, 1, grad)) cout << "Nota gravada com sucesso." << endl;
-  else if(pos_student3>=0)
+  else
   {
-    pos_student3=this->indexListPRR3[pos_student3].second;
-    if(this->gradStudentDisc(pos_student3, 2, grad))
+    pos_student3=this->searchStudentInPkIndex3(id);
+    if(pos_student3>=0)
+    {
+      pos_student3=this->indexListPRR3[pos_student3].second;
+      if(this->gradStudentDisc(pos_student3, 2, grad))
+        cout << "Nota gravada com sucesso." << endl;
+    }
+    else
+    {
+      this->gradNewStudentDisc(pos_student1, 2, grad);
       cout << "Nota gravada com sucesso." << endl;
+    }
   }
-  else{ this->gradNewStudentDisc(pos_student1, 2, grad); cout << "Nota gravada com sucesso." << endl;}
 
   cout << "Executando gerador de índices..." << endl;
   system("./gera_index lista1.txt lista2.txt lista3.txt");
