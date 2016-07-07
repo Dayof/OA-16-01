@@ -23,6 +23,7 @@ public:
   bool delInFile(string, string, vector<pair<string, int> >);
 
   bool gradStudentDisc(int, int, string);
+  bool gradNewStudentDisc(int, int, string);
 
   void loadPkIndex(string, int);
   void attPkIndex();
@@ -481,7 +482,8 @@ void StudentManagement::gradingStudent()
       gradi2 = grad[2] - '0';
       if(gradi2<0 || gradi2>10) incorrect=true; msgerror="nota";
     }
-    if(gradi1<0 || gradi1>10 || grad.size()>3){ incorrect=true; msgerror="nota";}
+    if(gradi1<0 || gradi1>10 || grad.size()>3 ||
+      grad.size()==1){ incorrect=true; msgerror="nota";}
 
     if(incorrect)
     {
@@ -500,18 +502,49 @@ void StudentManagement::gradingStudent()
     if(this->gradStudentDisc(pos_student2, 1, grad))
       cout << "Nota gravada com sucesso." << endl;
   }
-
-  if(pos_student3>=0)
+  else if(this->gradNewStudentDisc(pos_student1, 1, grad)) cout << "Nota gravada com sucesso." << endl;
+  else if(pos_student3>=0)
   {
     pos_student3=this->indexListPRR3[pos_student3].second;
     if(this->gradStudentDisc(pos_student3, 2, grad))
       cout << "Nota gravada com sucesso." << endl;
   }
+  else{ this->gradNewStudentDisc(pos_student1, 2, grad); cout << "Nota gravada com sucesso." << endl;}
 
+  cout << "Executando gerador de índices..." << endl;
+  system("./gera_index lista1.txt lista2.txt lista3.txt");
+  cout << "Índices atualizados!" << endl;
   getchar();
   pressEnter();
 
   showMenu();
+}
+
+bool StudentManagement::gradNewStudentDisc(int pos_student, int index, string grad)
+{
+  ofstream indexFile;
+  ifstream indexStuFile("lista1.txt");
+  string info, id, mat, name;
+
+  if(index==1) indexFile.open("lista2.txt", ios::app);
+  else indexFile.open("lista3.txt", ios::app);
+
+  pos_student=this->indexListPRR[pos_student].second;
+
+  if(indexFile.is_open() && indexStuFile.is_open())
+  {
+    indexStuFile.seekg(pos_student);
+    indexStuFile >> id >> mat >> name;
+    info=id+"|"+mat+"|"+name+"|"+grad;
+
+    indexFile << info << endl;
+  }
+  else return false;
+
+  indexFile.close();
+  indexStuFile.close();
+
+  return true;
 }
 
 //TODO check duplicate grades from one student

@@ -26,4 +26,7 @@ ID034|043341|Fabricio|6,6
 ID035|044072|Igor|5,5
 ID036|045058|Marcio|3,1
 ID038|046708|Thiago|6,1
-ID039|046713|Tiago|5,8
+ID039|046713|Tiago|5,8ID058 025538 Nolberto                32    H         AZ|||10
+ID058 025538 Nolberto                32    H         AZ|||10
+ID058 025538 Nolberto                32    H         AZ|||10
+ID058 025538 Nolberto                32    H         AZ|||10
