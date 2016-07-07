@@ -34,7 +34,11 @@ private:
 
 int main( int argc, char *argv[] )
 {
-    showMenu();
+  cout << "Executando gerador de índices..." << endl;
+  system("./gera_index lista1.txt lista2.txt lista3.txt");
+  cout << "Índices atualizados!" << endl;
+  pressEnter();
+  showMenu();
 }
 
 void showMenu()
@@ -472,10 +476,12 @@ void StudentManagement::gradingStudent()
     cout << "Escreva a nota (0,0 de 0 a 9 e 10):" << endl;
     cin >> grad;
     gradi1 = grad[0] - '0';
-    gradi2 = grad[2] - '0';
-
-    if(gradi1<0 || gradi1>10 || gradi2<0 || gradi2>10 ||
-      grad.size()>3){ incorrect=true; msgerror="nota";}
+    if(grad.size()==3)
+    {
+      gradi2 = grad[2] - '0';
+      if(gradi2<0 || gradi2>10) incorrect=true; msgerror="nota";
+    }
+    if(gradi1<0 || gradi1>10 || grad.size()>3){ incorrect=true; msgerror="nota";}
 
     if(incorrect)
     {

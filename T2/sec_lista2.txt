@@ -6,11 +6,11 @@ Erika 4 16
 Igor 5 18 
 Marcio 6 
 Rodrigo 7 19 
-Tiago 8 9 21 
+Tiago 8 9 21 28 29 
 Vitor 10 11 12 22 23 24 
 Paulo 13 25 
 Daniel 15 
 Fabricio 17 
 Thiago 20 
 Lisa 26 
-Marcelo 27 28 
+Marcelo 27 
