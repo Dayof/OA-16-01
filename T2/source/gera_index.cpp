@@ -139,7 +139,7 @@ void InvertIndex::createII(vector<string> files, int indexFile)
 {
   ofstream index;
   ifstream benchmark;
-  string id, number, name;
+  string id, number, name, name2;
   vector<pair<string, vector<int> > > pkList;
   vector<string> nameList;
   int i=0;
@@ -151,8 +151,10 @@ void InvertIndex::createII(vector<string> files, int indexFile)
   {
     if(indexFile==1)
       // static file
-      while(benchmark >> id >> number >> name)
+      while(benchmark >> id >> number >> name >> name2)
       {
+        // if name is string
+        if(name2[0]>='A') name+= ' ' + name2;
         benchmark.ignore(256, '\n');
         this->insertOrdered(pkList, i, name);
         ++i;

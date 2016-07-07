@@ -25,6 +25,8 @@ public:
   bool gradStudentDisc(int, int, string);
   bool gradNewStudentDisc(int, int, string);
 
+  void printReport(vector<vector<vector<string> > >);
+
   void loadPkIndex(string, int);
   void attPkIndex();
 private:
@@ -605,10 +607,152 @@ bool StudentManagement::gradStudentDisc(int pos_student, int index,
   return true;
 }
 
-
+// If a student id is missing of a list file then
+// the second vector will have less element
+// TODO students that exist in list2 or list3 but not in list1
+// TODO students with duplicate grad in list2 or list3
+// infogeral[infostu[infolist1, infolist2, infolist3]]
 void StudentManagement::report()
 {
+  string id1, id2, id3, mat, nome, op, curso, turma, grad1, grad2;
+  vector<string> infoList1, infoList2, infoList3;
+  vector<vector<vector<string> > > infoGeral;
+  ifstream indexInfoGrad1File("lista2.txt");
+  ifstream indexInfoGrad2File("lista3.txt");
+  ifstream indexInfoFile("lista1.txt");
+  vector<vector<string> > infoStu;
+  bool found1=false, found2=false;
 
+
+  if(indexInfoFile.is_open() && indexInfoGrad1File.is_open() &&
+    indexInfoGrad2File.is_open())
+  {
+    for(int i=0; i<this->indexListPRR.size();++i)
+    {
+      infoList1.clear();
+      infoList2.clear();
+      infoList3.clear();
+      infoStu.clear();
+
+      indexInfoFile.seekg(this->indexListPRR[i].second);
+
+      indexInfoFile >> id1 >> mat >> nome >> op >> curso >> turma;
+
+      infoList1.push_back(id1);
+      infoList1.push_back(mat);
+      infoList1.push_back(nome);
+      infoList1.push_back(op);
+      infoList1.push_back(curso);
+      infoList1.push_back(turma);
+
+      infoStu.push_back(infoList1);
+
+      auto compId = [id1](const pair<string, int>& element){
+        return element.first == id1; };
+
+      auto result = find_if(this->indexListPRR2.begin(),
+        this->indexListPRR2.end(), compId);
+
+      // id found in list1 exist in list2
+      if(result!=this->indexListPRR2.end())
+      {
+        indexInfoGrad1File.seekg((*result).second);
+
+        getline(indexInfoGrad1File,id2,'|');
+        getline(indexInfoGrad1File,mat,'|');
+        getline(indexInfoGrad1File,nome,'|');
+        getline(indexInfoGrad1File,grad1,'\n');
+
+        infoList2.push_back(id2);
+        infoList2.push_back(mat);
+        infoList2.push_back(nome);
+        infoList2.push_back(grad1);
+
+        infoStu.push_back(infoList2);
+      }
+      else
+      {
+        infoList2.push_back(id1);
+        infoList2.push_back(mat);
+        infoList2.push_back(nome);
+        infoList2.push_back("SR");
+
+        infoStu.push_back(infoList2);
+      }
+
+      auto result2 = find_if(this->indexListPRR3.begin(),
+        this->indexListPRR3.end(), compId);
+
+      // id found in list1 exist in list3
+      if(result2!=this->indexListPRR3.end())
+      {
+        indexInfoGrad2File.seekg((*result2).second);
+
+        getline(indexInfoGrad2File,id3,'|');
+        getline(indexInfoGrad2File,mat,'|');
+        getline(indexInfoGrad2File,nome,'|');
+        getline(indexInfoGrad2File,grad2,'\n');
+
+        infoList3.push_back(id3);
+        infoList3.push_back(mat);
+        infoList3.push_back(nome);
+        infoList3.push_back(grad2);
+
+        infoStu.push_back(infoList3);
+      }
+      else
+      {
+        infoList3.push_back(id1);
+        infoList3.push_back(mat);
+        infoList3.push_back(nome);
+        infoList3.push_back("SR");
+
+        infoStu.push_back(infoList3);
+      }
+
+      infoGeral.push_back(infoStu);
+      //cout << infoGeral[i] << endl;
+    }
+  }
+
+  indexInfoFile.close();
+  indexInfoGrad1File.close();
+  indexInfoGrad2File.close();
+
+  this->printReport(infoGeral);
+}
+
+// 1 vector. list of all students
+// 2 vector. list of the 3 infos from a student
+// 3 vector. list of attributes from a list info of a student
+void StudentManagement::printReport(vector<vector<vector<string> > > info)
+{
+  for(int i=0; i<info.size();++i)
+  {
+    cout << "<" << info[i][0][1] << " " << info[i][0][2] << " "
+    << info[i][0][3] << " " << info[i][0][4] << " " << info[i][0][5]
+    << ">" << endl;
+    cout << "Computação Quântica Avançada III:" << "<" << info[i][1][3]
+    << ">" << endl;
+    cout << "Modelagem Aeroespacial Alienígena II:" << "<" << info[i][2][3]
+    << ">" << endl;
+    getchar();
+  }
+
+  // for(int i=0; i<info.size();++i)
+  // {
+  //   for(int j=0; j<info[i].size();++j)
+  //   {
+  //     for(int k=0; k<info[i][j].size();++k)
+  //     {
+  //       cout << info[i][j][k] << endl;
+  //       cout << "i: " << i << endl;
+  //       cout << "j: " << j << endl;
+  //       cout << "k: " << k << endl;
+  //       getchar();
+  //     }
+  //   }
+  // }
 }
 
 void StudentManagement::search()

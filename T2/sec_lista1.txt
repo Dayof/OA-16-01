@@ -1,7 +1,7 @@
 Leonardo 0 25 
 Andreza 1 26 
 Rogerio 2 27 
-Ana 3 22 28 46 
+Ana Luisa 3 28 
 Bruno 4 29 
 Daniel 5 30 
 Danilo 6 31 
@@ -17,6 +17,7 @@ Paulo 18 42
 Lisa 19 43 
 Clarice 20 44 
 Lucas 21 45 
+Ana Paula 22 46 
 Carlos 23 47 
 Alberto 24 48 
 Nolberto 49 

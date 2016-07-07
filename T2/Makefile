@@ -2,7 +2,7 @@ SOURCE_DIR=source
 INCLUDE_DIR=include
 OBJ_DIR=obj
 
-CC=g++
+CC=g++ -std=c++11
 CFLAGS=-I$(INCLUDE_DIR)/
 
 LIBS=-lm
