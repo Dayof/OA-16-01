@@ -22,6 +22,8 @@ public:
   bool completeDelStudent();
   bool delInFile(string, string, vector<pair<string, int> >);
 
+  bool gradStudentDisc(int, int, string);
+
   void loadPkIndex(string, int);
   void attPkIndex();
 private:
@@ -223,6 +225,7 @@ void StudentManagement::deleteStudent()
   int pos_student1, pos_student2, pos_student3;
 
   clearScreen();
+
   do {
     cout << "Escreva o ID do aluno a ser jubilado:" << endl;
     cout << "ID (ID000, de 000 a 999)\n";
@@ -436,8 +439,120 @@ void StudentManagement::attPkIndex()
 
 void StudentManagement::gradingStudent()
 {
+  string id, grad, msgerror;
+  bool incorrect = false;
+  int pos_student1, pos_student2=-1000,
+      pos_student3=-1000, disc, gradi1, gradi2;
 
+  clearScreen();
+
+  do {
+    cout << "Escreva o ID do aluno para dar nota:" << endl;
+    cout << "ID (ID000, de 000 a 999)\n";
+    cin >> id;
+
+    if(id.size()!=5){ incorrect=true; msgerror="ID";}
+    else
+    {
+      pos_student1=this->searchStudentInPkIndex1(id);
+      if(pos_student1>=0) incorrect=false;
+      else
+      {
+        cout << "Estudante não existe! Tente inserir outro nome." << endl;
+        pressEnter();
+        incorrect=true;
+        continue;
+      }
+    }
+    cout << "Escreva o número da disciplina (1,2):" << endl;
+    cin >> disc;
+
+    if(disc!=1 && disc!=2){ incorrect=true; msgerror="disciplina";}
+
+    cout << "Escreva a nota (0,0 de 0 a 9 e 10):" << endl;
+    cin >> grad;
+    gradi1 = grad[0] - '0';
+    gradi2 = grad[2] - '0';
+
+    if(gradi1<0 || gradi1>10 || gradi2<0 || gradi2>10 ||
+      grad.size()>3){ incorrect=true; msgerror="nota";}
+
+    if(incorrect)
+    {
+      cout << "Erro nos dados inseridos de " << msgerror << "." << endl;
+      cout << "Tente inserir novamente." << endl;
+      pressEnter();
+    }
+  } while(incorrect);
+
+  if(disc==1) pos_student2=this->searchStudentInPkIndex2(id);
+  else pos_student3=this->searchStudentInPkIndex3(id);
+
+  if(pos_student2>=0)
+  {
+    pos_student2=this->indexListPRR2[pos_student2].second;
+    if(this->gradStudentDisc(pos_student2, 1, grad))
+      cout << "Nota gravada com sucesso." << endl;
+  }
+
+  if(pos_student3>=0)
+  {
+    pos_student3=this->indexListPRR3[pos_student3].second;
+    if(this->gradStudentDisc(pos_student3, 2, grad))
+      cout << "Nota gravada com sucesso." << endl;
+  }
+
+  getchar();
+  pressEnter();
+
+  showMenu();
 }
+
+//TODO check duplicate grades from one student
+bool StudentManagement::gradStudentDisc(int pos_student, int index,
+                                        string grad)
+{
+  ofstream outIndexFile("out.txt");
+  ifstream indexFile;
+  vector<string> lines;
+  string line, id, mat, name, info, filename;
+  size_t s;
+
+  if(index==1) filename = "lista2.txt";
+  else filename = "lista3.txt";
+
+  indexFile.open(filename);
+
+  if(indexFile.is_open())
+  {
+    indexFile.seekg(pos_student);
+
+    getline(indexFile,id,'|');
+    getline(indexFile,mat,'|');
+    getline(indexFile,name,'|');
+    info=id+"|"+mat+"|"+name+"|"+grad;
+
+    indexFile.seekg(0, ios::beg);
+    s=indexFile.tellg();
+    if(s==pos_student){ outIndexFile << info << endl; getline(indexFile,line);}
+    while(getline(indexFile, line))
+    {
+      if(s==pos_student) outIndexFile << info << endl;
+      else outIndexFile << line << endl;
+      s=indexFile.tellg();
+    }
+  }
+  else return false;
+
+  indexFile.close();
+  outIndexFile.close();
+
+  remove(filename.c_str());
+  rename("out.txt", filename.c_str());
+
+  return true;
+}
+
 
 void StudentManagement::report()
 {

@@ -1,17 +1,19 @@
-Danilo 0 8 
-Tiago 1 2 21 22 
-Alberto 3 14 
-Andreza 4 
-Ana Luisa 5 16 
-Bruno 6 
-Daniel 7 
-Vitor 9 
-Clarice 10 
-Lucas 11 
-Ana Paula 12 
-Carlos 13 
-Erika 15 
-Fabricio 17 
-Igor 18 
-Marcio 19 
-Thiago 20 
+Danilo 0 15 
+Erika 1 22 
+Rogerio 2 
+Leonardo 3 
+Ana Luisa 4 12 
+Bruno 5 13 
+Igor 6 24 
+Marcio 7 25 
+Tiago 8 9 27 28 
+Alberto 10 21 
+Andreza 11 
+Daniel 14 
+Vitor 16 
+Clarice 17 
+Lucas 18 
+Ana Paula 19 
+Carlos 20 
+Fabricio 23 
+Thiago 26 

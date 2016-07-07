@@ -1,21 +1,22 @@
-Fabricio 0 17 
-Thiago 1 21 
-Tiago 2 22 23 
-Vitor 3 4 24 25 26 
-Lisa 5 28 
-Clarice 6 29 
-Lucas 7 30 
-Ana 8 13 31 
-Alberto 9 33 
-Leonardo 10 
-Andreza 11 
-Rogerio 12 
-Bruno 14 
-Daniel 15 
-Danilo 16 
-Igor 18 
-Marcio 19 
-Rodrigo 20 
-Paulo 27 
-Carlos 32 
-Nolberto 34 
+Leonardo 0 25 
+Andreza 1 26 
+Rogerio 2 27 
+Ana 3 22 28 46 
+Bruno 4 29 
+Daniel 5 30 
+Danilo 6 31 
+Erika 7 
+Fabricio 8 32 
+Igor 9 33 
+Marcio 10 34 
+Rodrigo 11 35 
+Thiago 12 36 
+Tiago 13 14 37 38 
+Vitor 15 16 17 39 40 41 
+Paulo 18 42 
+Lisa 19 43 
+Clarice 20 44 
+Lucas 21 45 
+Carlos 23 47 
+Alberto 24 48 
+Nolberto 49 
