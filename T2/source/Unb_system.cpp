@@ -15,11 +15,14 @@ public:
   string generateLastId();
   int searchStudentInPkIndex(string);
   void deleteStudentPkIndex(int);
+  bool completeDelStudent();
+  bool delInFile(string, string, vector<pair<string, int> >);
 
   void loadPkIndex();
   void attPkIndex();
 private:
   vector<pair<string,int> > indexList;
+  vector<pair<string,int> > indexListPRR;
   int del_reg;
 };
 
@@ -79,7 +82,7 @@ void StudentManagement::loadPkIndex()
 {
   ifstream pkIndex;
   string id;
-  int nrr;
+  int prr, nrr;
 
   pkIndex.open("index_lista1.txt");
 
@@ -89,13 +92,18 @@ void StudentManagement::loadPkIndex()
     pkIndex.ignore(256, '\n');
     this->del_reg=nrr;
 
-    while(pkIndex >> id >> nrr)
+    while(pkIndex >> id >> prr >> nrr)
     {
       pkIndex.ignore(256, '\n');
-      pair<string,int> p(id,nrr);
-      this->indexList.push_back(p);
+      pair<string,int> n(id,nrr);
+      this->indexList.push_back(n);
+      cout << id << endl;
+
+      pair<string,int> p(id,prr);
+      this->indexListPRR.push_back(p);
     }
   }
+  getchar();
 
   pkIndex.close();
 }
@@ -201,7 +209,7 @@ bool StudentManagement::askInfoStudent(vector<string> &infoStudent)
 void StudentManagement::deleteStudent()
 {
   string id, ans;
-  bool incorrect;
+  bool incorrect = false;
   int pos_student;
 
   clearScreen();
@@ -209,7 +217,7 @@ void StudentManagement::deleteStudent()
     cout << "Escreva o ID do aluno a ser jubilado:" << endl;
     cout << "ID (ID000, de 000 a 999)\n";
     cin >> id;
-    if( id.size()!=5)
+    if(id.size()!=5)
     {
       incorrect=true;
       cout << "Dado incorreto, tente inserir novamente." << endl;
@@ -244,7 +252,84 @@ void StudentManagement::deleteStudentPkIndex(int pos_student)
 {
   this->indexList[pos_student].second=-1;
   ++this->del_reg;
-  this->attPkIndex();
+  if(this->del_reg<5) this->attPkIndex();
+  else
+  {
+    if(this->completeDelStudent())
+      cout << "Estudantes deletados dos benchmarks com sucesso!" << endl;
+    cout << "Executando gerador de índices..." << endl;
+    system("./gera_index lista1.txt lista2.txt lista3.txt");
+    cout << "Índices atualizados!" << endl;
+  }
+
+}
+
+int StudentManagement::searchStudentInPkIndex(string id)
+{
+  vector<pair<string,int> >::iterator it;
+  for(it=this->indexList.begin(); it!=this->indexList.end();++it)
+    if((*it).first==id) break;
+
+  if(it==this->indexList.end()) return -10000;
+  else return (distance(this->indexList.begin(), it));
+}
+
+
+bool StudentManagement::completeDelStudent()
+{
+  vector<pair<string, int> > students_to_be_del;
+
+  for(int j=0; j<this->indexList.size(); ++j)
+  {
+    if(this->indexList[j].second==-1)
+    {
+      pair<string, int> p(this->indexListPRR[j].first,
+                          this->indexListPRR[j].second);
+      cout << this->indexListPRR[j].first << endl;
+      students_to_be_del.push_back(p);
+    }
+  }
+  getchar();
+
+  if(this->delInFile("lista1.txt", "out1.txt", students_to_be_del) &&
+    this->delInFile("lista2.txt", "out1.txt", students_to_be_del) &&
+    this->delInFile("lista3.txt", "out1.txt", students_to_be_del)) return true;
+  else return false;
+}
+
+bool StudentManagement::delInFile(string filename, string filename2,
+                                vector<pair<string, int> > students_to_be_del)
+{
+  ofstream index_out_file(filename2);
+  ifstream indexFile(filename);
+  vector<string> lines;
+  string line;
+
+  if(indexFile.is_open())
+  {
+    for(int i=0; i<students_to_be_del.size(); ++i)
+    {
+      indexFile.seekg(students_to_be_del[i].second);
+      getline(indexFile, line);
+      cout << "line : " << line << endl;
+      lines.push_back(line);
+    }
+    getchar();
+
+    indexFile.seekg(0, ios::beg);
+    while(getline(indexFile, line))
+      if(find(lines.begin(),lines.end(),line)==lines.end())
+        index_out_file << line << endl;
+  }
+  else return false;
+
+  indexFile.close();
+  index_out_file.close();
+
+  //remove(filename.c_str());
+  //rename("out.txt", filename.c_str());
+
+  return true;
 }
 
 void StudentManagement::attPkIndex()
@@ -258,20 +343,11 @@ void StudentManagement::attPkIndex()
     pkIndex << this->del_reg << endl;
 
     for(int j=0; j<this->indexList.size(); ++j)
-      pkIndex << indexList[j].first << " " << indexList[j].second << endl;
+      pkIndex << indexList[j].first << " " << indexListPRR[j].second
+      << " " << indexList[j].second << endl;
   }
 
   pkIndex.close();
-}
-
-int StudentManagement::searchStudentInPkIndex(string id)
-{
-  vector<pair<string,int> >::iterator it;
-  for(it=this->indexList.begin(); it!=this->indexList.end();++it)
-    if((*it).first==id) break;
-
-  if(it==this->indexList.end()) return -10000;
-  else return (distance(this->indexList.begin(), it));
 }
 
 void StudentManagement::gradingStudent()

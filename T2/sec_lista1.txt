@@ -20,5 +20,3 @@ Lucas 21 45
 Carlos 23 47 
 Alberto 24 48 
 Nolberto 49 
-Dayanne 50 
-Diana 51 

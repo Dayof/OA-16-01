@@ -6,9 +6,7 @@ public:
   PrimaryIndex(string f){filename = f;};
   void createPI(vector<string>, int);
   void insertOrdered(vector<pair<string,int> > &, pair<string,int>);
-  // void remove(string);
-  // void search(string);
-  // void print();
+
 private:
   string filename;
 };
@@ -21,9 +19,6 @@ public:
   void insertOrdered(vector<pair<string, vector<int> > > &, int, string);
   void insertOrderedInvertList(vector<int> &, int);
   void printVectorSec(ofstream &, vector<int>);
-  // void remove(string);
-  // void search(string);
-  // void print();
 private:
   string filename;
 };
@@ -33,7 +28,8 @@ int main( int argc, char *argv[] )
   if(argc==4)
   {
     vector<string> file_list_name(argv, argv + argc);
-    if(!checkList(file_list_name)) cout << "Some file doesn't exist or can't be opened." << endl;
+    if(!checkList(file_list_name))
+      cout << "Some file doesn't exist or can't be opened." << endl;
     else createFiles(file_list_name);
   }
   else{
@@ -107,13 +103,15 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
   index << 0 << endl;
 
   for(int j=0; j<indexList.size(); ++j)
-    index << indexList[j].first << " " << indexList[j].second << endl;
+    index << indexList[j].first << " " << indexList[j].second*TAMFIXO
+    << " " << indexList[j].second << endl;
 
   index.close();
   benchmark.close();
 }
 
-void PrimaryIndex::insertOrdered(vector<pair<string,int> > &indexList, pair<string,int> id)
+void PrimaryIndex::insertOrdered(vector<pair<string,int> > &indexList,
+                                pair<string,int> id)
 {
   vector<pair<string,int> >::iterator it = indexList.end()-1;
   pair<string,int> aux;
@@ -121,9 +119,10 @@ void PrimaryIndex::insertOrdered(vector<pair<string,int> > &indexList, pair<stri
   if(indexList.empty()) indexList.push_back(id);
   else if((*it).first>id.first)
   {
-    while((*it).first>id.first) --it;
+    while(it!=indexList.begin() && (*it).first>id.first) --it;
     aux=*it;
-    indexList.insert(it+1,id);
+    if(it==indexList.begin() && (*it).first>id.first) indexList.insert(it,id);
+    else indexList.insert(it+1,id);
   }
   else indexList.push_back(id);
 }
@@ -179,7 +178,8 @@ void InvertIndex::printVectorSec(ofstream &index, vector<int> pkList)
   for(int i=0; i<pkList.size(); ++i) index << pkList[i] << " ";
 }
 
-void InvertIndex::insertOrdered(vector<pair<string, vector<int> > > &pkList, int rrn, string name)
+void InvertIndex::insertOrdered(vector<pair<string, vector<int> > > &pkList,
+                                int rrn, string name)
 {
   vector<pair<string, vector<int> > >::iterator it = pkList.begin();
   pair<string, vector<int> > aux;

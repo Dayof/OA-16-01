@@ -1,10 +1,12 @@
+#include <cstdio>
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <utility>
 #include <string>
+#include <algorithm>
 
-#define TAMFIXO 24
+#define TAMFIXO 55
 // byte offset = RRN * TAMFIXO
 
 using namespace std;

@@ -48,5 +48,3 @@ ID048 041116 Ana Paula               34    A         AX
 ID049 042356 Carlos                  34    A         AX
 ID050 045531 Alberto                 34    A         AX
 ID058 025538 Nolberto                32    H         AZ
-ID059 876432 Dayanne                 98    G         AC
-ID060 856745 Diana                   98    Z         ZZ
