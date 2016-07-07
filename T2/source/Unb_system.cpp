@@ -13,17 +13,21 @@ public:
   bool askInfoStudent(vector<string> &);
   void registerNameFile(fstream &, string);
   string generateLastId();
-  int searchStudentInPkIndex(string);
-  void deleteStudentPkIndex(int);
+
+  int searchStudentInPkIndex1(string);
+  int searchStudentInPkIndex2(string);
+  int searchStudentInPkIndex3(string);
+
+  void deleteStudentPkIndex(int, int);
   bool completeDelStudent();
   bool delInFile(string, string, vector<pair<string, int> >);
 
-  void loadPkIndex();
+  void loadPkIndex(string, int);
   void attPkIndex();
 private:
-  vector<pair<string,int> > indexList;
-  vector<pair<string,int> > indexListPRR;
-  int del_reg;
+  vector<pair<string,int> > indexList, indexList2, indexList3;
+  vector<pair<string,int> > indexListPRR, indexListPRR2, indexListPRR3;
+  int del_reg, del_reg2, del_reg3;
 };
 
 int main( int argc, char *argv[] )
@@ -37,7 +41,9 @@ void showMenu()
     int op;
     StudentManagement students;
 
-    students.loadPkIndex();
+    students.loadPkIndex("index_lista1.txt", 1);
+    students.loadPkIndex("index_lista2.txt", 2);
+    students.loadPkIndex("index_lista3.txt", 3);
 
     clearScreen();
     cout << "Sistema de Notas UnB v0.1 beta" << endl;
@@ -78,32 +84,36 @@ void showMenu()
 
 }
 
-void StudentManagement::loadPkIndex()
+void StudentManagement::loadPkIndex(string filename, int index)
 {
   ifstream pkIndex;
-  string id;
   int prr, nrr;
+  string id;
 
-  pkIndex.open("index_lista1.txt");
+  pkIndex.open(filename);
 
   if(pkIndex.is_open())
   {
     pkIndex >> nrr;
     pkIndex.ignore(256, '\n');
-    this->del_reg=nrr;
+    if(index==1) this->del_reg=nrr;
+    if(index==2) this->del_reg2=nrr;
+    else this->del_reg3=nrr;
 
     while(pkIndex >> id >> prr >> nrr)
     {
       pkIndex.ignore(256, '\n');
       pair<string,int> n(id,nrr);
-      this->indexList.push_back(n);
-      cout << id << endl;
+      if(index==1) this->indexList.push_back(n);
+      else if(index==2) this->indexList2.push_back(n);
+      else this->indexList3.push_back(n);
 
       pair<string,int> p(id,prr);
-      this->indexListPRR.push_back(p);
+      if(index==1) this->indexListPRR.push_back(p);
+      else if(index==2) this->indexListPRR2.push_back(p);
+      else this->indexListPRR3.push_back(p);
     }
   }
-  getchar();
 
   pkIndex.close();
 }
@@ -210,7 +220,7 @@ void StudentManagement::deleteStudent()
 {
   string id, ans;
   bool incorrect = false;
-  int pos_student;
+  int pos_student1, pos_student2, pos_student3;
 
   clearScreen();
   do {
@@ -225,8 +235,10 @@ void StudentManagement::deleteStudent()
     }
     else
     {
-      pos_student=this->searchStudentInPkIndex(id);
-      if(pos_student>=0) incorrect=false;
+      pos_student1=this->searchStudentInPkIndex1(id);
+      pos_student2=this->searchStudentInPkIndex2(id);
+      pos_student3=this->searchStudentInPkIndex3(id);
+      if(pos_student1>=0 || pos_student2>=0 || pos_student3>=0) incorrect=false;
       else
       {
         cout << "Estudante não existe! Tente inserir outro nome." << endl;
@@ -241,18 +253,34 @@ void StudentManagement::deleteStudent()
 
   if(ans=="y")
   {
-    this->deleteStudentPkIndex(pos_student);
+    if(pos_student1>=0) this->deleteStudentPkIndex(pos_student1, 1);
+    if(pos_student2>=0) this->deleteStudentPkIndex(pos_student2, 2);
+    if(pos_student3>=0) this->deleteStudentPkIndex(pos_student3, 3);
     cout << "Aluno deletado com sucesso." << endl;
     pressEnter();
   }
   showMenu();
 }
 
-void StudentManagement::deleteStudentPkIndex(int pos_student)
+void StudentManagement::deleteStudentPkIndex(int pos_student, int index)
 {
-  this->indexList[pos_student].second=-1;
-  ++this->del_reg;
-  if(this->del_reg<5) this->attPkIndex();
+  if(index==1)
+  {
+    this->indexList[pos_student].second=-1;
+    ++this->del_reg;
+  }
+  else if(index==2)
+  {
+    this->indexList2[pos_student].second=-1;
+    ++this->del_reg2;
+  }
+  else
+  {
+    this->indexList3[pos_student].second=-1;
+    ++this->del_reg3;
+  }
+
+  if(this->del_reg<5 && this->del_reg2<5 && this->del_reg3<5) this->attPkIndex();
   else
   {
     if(this->completeDelStudent())
@@ -261,10 +289,9 @@ void StudentManagement::deleteStudentPkIndex(int pos_student)
     system("./gera_index lista1.txt lista2.txt lista3.txt");
     cout << "Índices atualizados!" << endl;
   }
-
 }
 
-int StudentManagement::searchStudentInPkIndex(string id)
+int StudentManagement::searchStudentInPkIndex1(string id)
 {
   vector<pair<string,int> >::iterator it;
   for(it=this->indexList.begin(); it!=this->indexList.end();++it)
@@ -274,10 +301,30 @@ int StudentManagement::searchStudentInPkIndex(string id)
   else return (distance(this->indexList.begin(), it));
 }
 
+int StudentManagement::searchStudentInPkIndex2(string id)
+{
+  vector<pair<string,int> >::iterator it;
+  for(it=this->indexList2.begin(); it!=this->indexList2.end();++it)
+    if((*it).first==id) break;
+
+  if(it==this->indexList2.end()) return -10000;
+  else return (distance(this->indexList2.begin(), it));
+}
+
+int StudentManagement::searchStudentInPkIndex3(string id)
+{
+  vector<pair<string,int> >::iterator it;
+  for(it=this->indexList3.begin(); it!=this->indexList3.end();++it)
+    if((*it).first==id) break;
+
+  if(it==this->indexList3.end()) return -10000;
+  else return (distance(this->indexList3.begin(), it));
+}
+
 
 bool StudentManagement::completeDelStudent()
 {
-  vector<pair<string, int> > students_to_be_del;
+  vector<pair<string, int> > del_stu1, del_stu2, del_stu3;
 
   for(int j=0; j<this->indexList.size(); ++j)
   {
@@ -285,15 +332,33 @@ bool StudentManagement::completeDelStudent()
     {
       pair<string, int> p(this->indexListPRR[j].first,
                           this->indexListPRR[j].second);
-      cout << this->indexListPRR[j].first << endl;
-      students_to_be_del.push_back(p);
+      del_stu1.push_back(p);
     }
   }
-  getchar();
 
-  if(this->delInFile("lista1.txt", "out1.txt", students_to_be_del) &&
-    this->delInFile("lista2.txt", "out1.txt", students_to_be_del) &&
-    this->delInFile("lista3.txt", "out1.txt", students_to_be_del)) return true;
+  for(int j=0; j<this->indexList2.size(); ++j)
+  {
+    if(this->indexList2[j].second==-1)
+    {
+      pair<string, int> p(this->indexListPRR2[j].first,
+                          this->indexListPRR2[j].second);
+      del_stu2.push_back(p);
+    }
+  }
+
+  for(int j=0; j<this->indexList3.size(); ++j)
+  {
+    if(this->indexList3[j].second==-1)
+    {
+      pair<string, int> p(this->indexListPRR3[j].first,
+                          this->indexListPRR3[j].second);
+      del_stu3.push_back(p);
+    }
+  }
+
+  if(this->delInFile("lista1.txt", "out1.txt", del_stu1) &&
+    this->delInFile("lista2.txt", "out2.txt", del_stu2) &&
+    this->delInFile("lista3.txt", "out3.txt", del_stu3)) return true;
   else return false;
 }
 
@@ -311,10 +376,8 @@ bool StudentManagement::delInFile(string filename, string filename2,
     {
       indexFile.seekg(students_to_be_del[i].second);
       getline(indexFile, line);
-      cout << "line : " << line << endl;
       lines.push_back(line);
     }
-    getchar();
 
     indexFile.seekg(0, ios::beg);
     while(getline(indexFile, line))
@@ -326,17 +389,19 @@ bool StudentManagement::delInFile(string filename, string filename2,
   indexFile.close();
   index_out_file.close();
 
-  //remove(filename.c_str());
-  //rename("out.txt", filename.c_str());
+  remove(filename.c_str());
+  rename(filename2.c_str(), filename.c_str());
 
   return true;
 }
 
 void StudentManagement::attPkIndex()
 {
-  ofstream pkIndex;
+  ofstream pkIndex, pkIndex2, pkIndex3;
 
   pkIndex.open("index_lista1.txt");
+  pkIndex2.open("index_lista2.txt");
+  pkIndex3.open("index_lista3.txt");
 
   if(pkIndex.is_open())
   {
@@ -346,8 +411,27 @@ void StudentManagement::attPkIndex()
       pkIndex << indexList[j].first << " " << indexListPRR[j].second
       << " " << indexList[j].second << endl;
   }
+  if(pkIndex2.is_open())
+  {
+    pkIndex2 << this->del_reg2 << endl;
+
+    for(int j=0; j<this->indexList2.size(); ++j)
+      pkIndex2 << indexList2[j].first << " " << indexListPRR2[j].second
+      << " " << indexList2[j].second << endl;
+  }
+
+  if(pkIndex3.is_open())
+  {
+    pkIndex3 << this->del_reg3 << endl;
+
+    for(int j=0; j<this->indexList3.size(); ++j)
+      pkIndex3 << indexList3[j].first << " " << indexListPRR3[j].second
+      << " " << indexList3[j].second << endl;
+  }
 
   pkIndex.close();
+  pkIndex2.close();
+  pkIndex3.close();
 }
 
 void StudentManagement::gradingStudent()

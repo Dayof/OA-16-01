@@ -5,7 +5,8 @@ class PrimaryIndex
 public:
   PrimaryIndex(string f){filename = f;};
   void createPI(vector<string>, int);
-  void insertOrdered(vector<pair<string,int> > &, pair<string,int>);
+  void insertOrdered(vector<pair<string,pair<int, int> > > &,
+                      pair<string, pair<int,int> >);
 
 private:
   string filename;
@@ -68,11 +69,12 @@ void createFiles(vector<string> files)
 
 void PrimaryIndex::createPI(vector<string> files, int indexFile)
 {
-  ofstream index;
+  vector<pair<string, pair<int, int> > > indexList;
+  int i=0, size_prr=0;
   ifstream benchmark;
+  ofstream index;
   string id;
-  vector<pair<string,int> > indexList;
-  int i=0;
+  size_t s;
 
   index.open(this->filename);
   benchmark.open(files[indexFile]);
@@ -83,8 +85,11 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
       // static file
       while(benchmark >> id)
       {
+        s=benchmark.tellg();
+        size_prr=s-id.size();
         benchmark.ignore(256, '\n');
-        pair<string,int> p(id,i);
+        pair<int,int> p0(size_prr,i);
+        pair<string, pair<int,int> > p(id,p0);
         this->insertOrdered(indexList, p);
         ++i;
       }
@@ -92,8 +97,11 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
       // dynamic file
       while(getline(benchmark,id,'|'))
       {
+        s=benchmark.tellg();
+        size_prr=s-id.size()-1;
         benchmark.ignore(256, '\n');
-        pair<string,int> p(id,i);
+        pair<int,int> p0(size_prr,i);
+        pair<string, pair<int,int> > p(id,p0);
         this->insertOrdered(indexList, p);
         ++i;
       }
@@ -103,18 +111,18 @@ void PrimaryIndex::createPI(vector<string> files, int indexFile)
   index << 0 << endl;
 
   for(int j=0; j<indexList.size(); ++j)
-    index << indexList[j].first << " " << indexList[j].second*TAMFIXO
-    << " " << indexList[j].second << endl;
+    index << indexList[j].first << " " << indexList[j].second.first
+    << " " << indexList[j].second.second << endl;
 
   index.close();
   benchmark.close();
 }
 
-void PrimaryIndex::insertOrdered(vector<pair<string,int> > &indexList,
-                                pair<string,int> id)
+void PrimaryIndex::insertOrdered(vector<pair<string,pair<int, int> > > &indexList,
+                                pair<string, pair<int,int> > id)
 {
-  vector<pair<string,int> >::iterator it = indexList.end()-1;
-  pair<string,int> aux;
+  vector<pair<string,pair<int, int> > >::iterator it = indexList.end()-1;
+  pair<string,pair<int, int> > aux;
 
   if(indexList.empty()) indexList.push_back(id);
   else if((*it).first>id.first)
