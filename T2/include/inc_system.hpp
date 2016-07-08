@@ -6,9 +6,6 @@
 #include <string>
 #include <algorithm>
 
-#define TAMFIXO 55
-// byte offset = RRN * TAMFIXO
-
 using namespace std;
 
 bool checkList(vector<string>);

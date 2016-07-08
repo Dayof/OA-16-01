@@ -1,3 +1,8 @@
+/* Trabalho 2 de OA 2016/01
+Desenvolvedora:
+1. Dayanne Fernandes da Cunha - 13/0107191
+*/
+
 #include <inc_system.hpp>
 
 class PrimaryIndex
@@ -17,9 +22,9 @@ class InvertIndex
 public:
   InvertIndex(string f){filename = f;};
   void createII(vector<string>, int);
-  void insertOrdered(vector<pair<string, vector<int> > > &, int, string);
-  void insertOrderedInvertList(vector<int> &, int);
-  void printVectorSec(ofstream &, vector<int>);
+  void insertOrdered(vector<pair<string, vector<string> > > &, string, string);
+  void insertOrderedInvertList(vector<string> &, string);
+  void printVectorSec(ofstream &, vector<string>);
 private:
   string filename;
 };
@@ -140,9 +145,10 @@ void InvertIndex::createII(vector<string> files, int indexFile)
   ofstream index;
   ifstream benchmark;
   string id, number, name, name2;
-  vector<pair<string, vector<int> > > pkList;
+  vector<pair<string, vector<string> > > pkList;
   vector<string> nameList;
   int i=0;
+  int s;
 
   index.open(this->filename);
   benchmark.open(files[indexFile]);
@@ -150,16 +156,18 @@ void InvertIndex::createII(vector<string> files, int indexFile)
   if(index.is_open() && benchmark.is_open())
   {
     if(indexFile==1)
+    {
       // static file
       while(benchmark >> id >> number >> name >> name2)
       {
         // if name is string
         if(name2[0]>='A') name+= ' ' + name2;
         benchmark.ignore(256, '\n');
-        this->insertOrdered(pkList, i, name);
-        ++i;
+        this->insertOrdered(pkList, id, name);
       }
+    }
     else
+    {
       // dynamic file
       while(!benchmark.eof())
       {
@@ -167,9 +175,9 @@ void InvertIndex::createII(vector<string> files, int indexFile)
         getline(benchmark,number,'|');
         getline(benchmark,name,'|');
         benchmark.ignore(256, '\n');
-        this->insertOrdered(pkList, i, name);
-        ++i;
+        this->insertOrdered(pkList, id, name);
       }
+    }
   }
 
   for(int j=0; j<pkList.size(); ++j)
@@ -183,21 +191,21 @@ void InvertIndex::createII(vector<string> files, int indexFile)
   benchmark.close();
 }
 
-void InvertIndex::printVectorSec(ofstream &index, vector<int> pkList)
+void InvertIndex::printVectorSec(ofstream &index, vector<string> pkList)
 {
   for(int i=0; i<pkList.size(); ++i) index << pkList[i] << " ";
 }
 
-void InvertIndex::insertOrdered(vector<pair<string, vector<int> > > &pkList,
-                                int rrn, string name)
+void InvertIndex::insertOrdered(vector<pair<string, vector<string> > > &pkList,
+                                string prr, string name)
 {
-  vector<pair<string, vector<int> > >::iterator it = pkList.begin();
-  pair<string, vector<int> > aux;
-  vector<int> nameList;
+  vector<pair<string, vector<string> > >::iterator it = pkList.begin();
+  pair<string, vector<string> > aux;
+  vector<string> nameList;
 
   if(pkList.empty())
   {
-    nameList.push_back(rrn);
+    nameList.push_back(prr);
     aux=make_pair(name, nameList);
     pkList.push_back(aux);
   }
@@ -211,28 +219,28 @@ void InvertIndex::insertOrdered(vector<pair<string, vector<int> > > &pkList,
     if(it!=pkList.end())
     {
       nameList = (*it).second;
-      this->insertOrderedInvertList(nameList, rrn);
+      this->insertOrderedInvertList(nameList, prr);
       (*it).second = nameList;
     }
     else
     {
-      nameList.push_back(rrn);
+      nameList.push_back(prr);
       aux=make_pair(name, nameList);
       pkList.push_back(aux);
     }
   }
 }
 
-void InvertIndex::insertOrderedInvertList(vector<int> &nameList, int rrn)
+void InvertIndex::insertOrderedInvertList(vector<string> &nameList, string prr)
 {
-  vector<int>::iterator it = nameList.end()-1;
-  int aux;
+  vector<string>::iterator it = nameList.end()-1;
+  string aux;
 
-  if(*it>rrn)
+  if(*it>prr)
   {
-    while(*it>rrn) --it;
+    while(*it>prr) --it;
     aux=*it;
-    nameList.insert(it+1,rrn);
+    nameList.insert(it+1,prr);
   }
-  else nameList.push_back(rrn);
+  else nameList.push_back(prr);
 }

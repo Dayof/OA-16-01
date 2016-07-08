@@ -1,3 +1,8 @@
+/* Trabalho 2 de OA 2016/01
+Desenvolvedora:
+1. Dayanne Fernandes da Cunha - 13/0107191
+*/
+
 #include <inc_system.hpp>
 
 class StudentManagement
@@ -27,10 +32,16 @@ public:
 
   void printReport(vector<vector<vector<string> > >);
 
+  bool searchStudentInSkIndex(string, vector<string>&);
+
+  void printGradSearch(vector<string>);
+
   void loadPkIndex(string, int);
+  void loadSkIndex(string, int);
   void attPkIndex();
 private:
   vector<pair<string,int> > indexList, indexList2, indexList3;
+  vector<pair<string, vector<string> > > indexSkList, indexSkList2, indexSkList3;
   vector<pair<string,int> > indexListPRR, indexListPRR2, indexListPRR3;
   int del_reg, del_reg2, del_reg3;
 };
@@ -50,15 +61,17 @@ void showMenu()
     int op;
     StudentManagement students;
 
-    students.loadPkIndex("index_lista1.txt", 1);
-    students.loadPkIndex("index_lista2.txt", 2);
-    students.loadPkIndex("index_lista3.txt", 3);
+    for(int i=1; i<=3; ++i)
+    {
+      students.loadPkIndex("index_lista"+to_string(i)+".txt", i);
+      students.loadSkIndex("sec_lista"+to_string(i)+".txt", i);
+    }
 
     clearScreen();
     cout << "Sistema de Notas UnB v0.1 beta" << endl;
-    cout << "1. Inserir novo aluno na UnB\n"
-            "2. Jubilar um aluno da UnB\n"
-            "3. Dar nota ao aluno numa disciplina\n"
+    cout << "1. Inserir nova(o) aluna(o) na UnB\n"
+            "2. Jubilar um aluna(o) da UnB\n"
+            "3. Dar nota ao aluna(o) numa disciplina\n"
             "4. Relatório\n"
             "5. Buscar\n"
             "6. Sair" << endl;
@@ -91,6 +104,54 @@ void showMenu()
             showMenu();
     }
 
+}
+
+void StudentManagement::loadSkIndex(string filename, int index)
+{
+  ifstream skIndex;
+  string name, nrr, line, word_aux;
+  vector<string> nrrList;
+  vector<string> words;
+
+  skIndex.open(filename);
+
+  if(skIndex.is_open())
+  {
+    while(!skIndex.eof())
+    {
+      nrrList.clear();
+      words.clear();
+
+      getline(skIndex, line);
+      for(int i=0; i<line.size();++i)
+      {
+        if(line[i]==' ')
+        {
+          words.push_back(word_aux);
+          word_aux.clear();
+        }
+        else word_aux+=line[i];
+      }
+
+      if(words[1][1]!='D')
+      {
+        name=words[0] + ' ' + words[1];
+        for(int j=2; j<words.size(); ++j) nrrList.push_back(words[j]);
+      }
+      else
+      {
+        name=words[0];
+        for(int j=1; j<words.size(); ++j) nrrList.push_back(words[j]);
+      }
+
+      pair<string, vector<string> > p(name,nrrList);
+      if(index==1) this->indexSkList.push_back(p);
+      else if(index==2) this->indexSkList2.push_back(p);
+      else this->indexSkList3.push_back(p);
+    }
+  }
+
+  skIndex.close();
 }
 
 void StudentManagement::loadPkIndex(string filename, int index)
@@ -188,7 +249,7 @@ bool StudentManagement::askInfoStudent(vector<string> &infoStudent)
 
   clearScreen();
   do {
-    cout << "Escreva as seguintes informações do estudante:" << endl;
+    cout << "Escreva as seguintes informações da(o) estudante:" << endl;
     cout << "Matrícula (000000, de 0 a 999999)\n";
     cin >> mat;
     cout << "Nome (Até 23 caracteres)\n";
@@ -234,7 +295,7 @@ void StudentManagement::deleteStudent()
   clearScreen();
 
   do {
-    cout << "Escreva o ID do aluno a ser jubilado:" << endl;
+    cout << "Escreva o ID da(o) aluna(o) a ser jubilada(o):" << endl;
     cout << "ID (ID000, de 000 a 999)\n";
     cin >> id;
     if(id.size()!=5)
@@ -258,7 +319,7 @@ void StudentManagement::deleteStudent()
     }
   } while(incorrect);
 
-  cout << "Deseja jubilar o aluno de ID " << id << " ? (y/n)" << endl;
+  cout << "Deseja jubilar o aluna(o) de ID " << id << " ? (y/n)" << endl;
   cin >> ans;
 
   if(ans=="y")
@@ -266,7 +327,7 @@ void StudentManagement::deleteStudent()
     if(pos_student1>=0) this->deleteStudentPkIndex(pos_student1, 1);
     if(pos_student2>=0) this->deleteStudentPkIndex(pos_student2, 2);
     if(pos_student3>=0) this->deleteStudentPkIndex(pos_student3, 3);
-    cout << "Aluno deletado com sucesso." << endl;
+    cout << "Aluna(o) deletada(o) com sucesso." << endl;
     pressEnter();
   }
   showMenu();
@@ -294,7 +355,7 @@ void StudentManagement::deleteStudentPkIndex(int pos_student, int index)
   else
   {
     if(this->completeDelStudent())
-      cout << "Estudantes deletados dos benchmarks com sucesso!" << endl;
+      cout << "Estudantes deletada(o)s dos benchmarks com sucesso!" << endl;
     cout << "Executando gerador de índices..." << endl;
     system("./gera_index lista1.txt lista2.txt lista3.txt");
     cout << "Índices atualizados!" << endl;
@@ -329,6 +390,21 @@ int StudentManagement::searchStudentInPkIndex3(string id)
 
   if(it==this->indexList3.end()) return -10000;
   else return (distance(this->indexList3.begin(), it));
+}
+
+bool StudentManagement::searchStudentInSkIndex(string name,
+  vector<string>& nrrList)
+{
+  vector<pair<string, vector<string> > >::iterator it;
+  for(it=this->indexSkList.begin(); it!=this->indexSkList.end();++it)
+    if((*it).first==name) break;
+
+  if(it==this->indexSkList.end()) return false;
+  else
+  {
+    nrrList=(*it).second;
+    return true;
+  }
 }
 
 
@@ -454,7 +530,7 @@ void StudentManagement::gradingStudent()
   clearScreen();
 
   do {
-    cout << "Escreva o ID do aluno para dar nota:" << endl;
+    cout << "Escreva o ID da(o) aluna(o) para dar nota:" << endl;
     cout << "ID (ID000, de 000 a 999)\n";
     cin >> id;
 
@@ -636,7 +712,15 @@ void StudentManagement::report()
 
       indexInfoFile.seekg(this->indexListPRR[i].second);
 
-      indexInfoFile >> id1 >> mat >> nome >> op >> curso >> turma;
+      indexInfoFile >> id1 >> mat >> nome >> op;
+
+      // if op is a continue of the name
+      if(op[0]>='A')
+      {
+        nome+= ' ' + op;
+        indexInfoFile >> op >> curso >> turma;
+      }
+      else indexInfoFile >> curso >> turma;
 
       infoList1.push_back(id1);
       infoList1.push_back(mat);
@@ -711,7 +795,6 @@ void StudentManagement::report()
       }
 
       infoGeral.push_back(infoStu);
-      //cout << infoGeral[i] << endl;
     }
   }
 
@@ -732,32 +815,148 @@ void StudentManagement::printReport(vector<vector<vector<string> > > info)
     cout << "<" << info[i][0][1] << " " << info[i][0][2] << " "
     << info[i][0][3] << " " << info[i][0][4] << " " << info[i][0][5]
     << ">" << endl;
-    cout << "Computação Quântica Avançada III:" << "<" << info[i][1][3]
-    << ">" << endl;
-    cout << "Modelagem Aeroespacial Alienígena II:" << "<" << info[i][2][3]
-    << ">" << endl;
-    getchar();
+    cout << "Computação Quântica Avançada III:" << " " << info[i][1][3] << endl;
+    cout << "Modelagem Aeroespacial Alienígena II:" << " " << info[i][2][3] << endl;
+    pressEnter();
   }
-
-  // for(int i=0; i<info.size();++i)
-  // {
-  //   for(int j=0; j<info[i].size();++j)
-  //   {
-  //     for(int k=0; k<info[i][j].size();++k)
-  //     {
-  //       cout << info[i][j][k] << endl;
-  //       cout << "i: " << i << endl;
-  //       cout << "j: " << j << endl;
-  //       cout << "k: " << k << endl;
-  //       getchar();
-  //     }
-  //   }
-  // }
 }
 
 void StudentManagement::search()
 {
+  string nome, msgerror;
+  bool incorrect=false;
+  vector<string> nrrList;
 
+  clearScreen();
+
+  do {
+    cout << "Escreva o nome da(o) aluna(o) (até 23 caracteres):" << endl;
+    cin >> nome;
+
+    if(nome.size()>23){ incorrect=true; msgerror="nome";}
+    else
+    {
+      if(this->searchStudentInSkIndex(nome, nrrList))
+        this->printGradSearch(nrrList);
+      else
+      {
+        cout << "Estudante não existe! Tente inserir outro nome." << endl;
+        pressEnter();
+        incorrect=true;
+      }
+    }
+  } while(incorrect);
+}
+
+void StudentManagement::printGradSearch(vector<string> nrrList)
+{
+  vector<vector<vector<string> > > infoGeral;
+  vector<vector<string> > infoStu;
+  vector<string> infoList2, infoList3;
+  string id, id2, id3, mat, nome, op, curso, turma, grad1, grad2;
+  ifstream indexInfoGrad1File("lista2.txt");
+  ifstream indexInfoGrad2File("lista3.txt");
+  vector<pair<string,int> >::iterator it;
+  vector<int> infoList;
+
+  if(indexInfoGrad1File.is_open() && indexInfoGrad2File.is_open())
+  {
+
+    for(int m=0; m<nrrList.size(); ++m)
+    {
+      infoList.clear();
+      infoList2.clear();
+      infoList3.clear();
+      infoStu.clear();
+
+      id = nrrList[m];
+
+      for(it=this->indexListPRR2.begin(); it!=this->indexListPRR2.end();++it)
+        if((*it).first==id) infoList.push_back((*it).second);
+
+      // name found in list1 exist in list2
+      if(!infoList.empty())
+      {
+        for(int t=0; t<infoList.size(); ++t)
+        {
+          indexInfoGrad1File.seekg(infoList[t]);
+
+          getline(indexInfoGrad1File,id2,'|');
+          getline(indexInfoGrad1File,mat,'|');
+          getline(indexInfoGrad1File,nome,'|');
+          getline(indexInfoGrad1File,grad1,'\n');
+
+          infoList2.push_back(id2);
+          infoList2.push_back(mat);
+          infoList2.push_back(nome);
+          infoList2.push_back(grad1);
+
+          getchar();
+
+          infoStu.push_back(infoList2);
+        }
+      }
+      else
+      {
+        infoList2.push_back(id);
+        infoList2.push_back(mat);
+        infoList2.push_back(nome);
+        infoList2.push_back("SR");
+
+        infoStu.push_back(infoList2);
+      }
+
+      infoList.clear();
+
+      for(it=this->indexListPRR3.begin(); it!=this->indexListPRR3.end();++it)
+        if((*it).first==id) infoList.push_back((*it).second);
+
+      // id found in list1 exist in list3
+      if(!infoList.empty())
+      {
+        for(int t=0; t<infoList.size(); ++t)
+        {
+          indexInfoGrad2File.seekg(infoList[t]);
+
+          getline(indexInfoGrad2File,id3,'|');
+          getline(indexInfoGrad2File,mat,'|');
+          getline(indexInfoGrad2File,nome,'|');
+          getline(indexInfoGrad2File,grad2,'\n');
+
+          infoList3.push_back(id3);
+          infoList3.push_back(mat);
+          infoList3.push_back(nome);
+          infoList3.push_back(grad2);
+
+          infoStu.push_back(infoList3);
+        }
+      }
+      else
+      {
+        infoList3.push_back(id);
+        infoList3.push_back(mat);
+        infoList3.push_back(nome);
+        infoList3.push_back("SR");
+
+        infoStu.push_back(infoList3);
+      }
+
+      infoGeral.push_back(infoStu);
+    }
+  }
+
+  indexInfoGrad1File.close();
+  indexInfoGrad2File.close();
+
+  for(int i=0; i<infoGeral.size();++i)
+  {
+    cout << "Id: " << nrrList[i] << endl;
+    cout << "Computação Quântica Avançada III:" << " "
+    << infoGeral[i][0][3] << endl;
+    cout << "Modelagem Aeroespacial Alienígena II:" << " "
+    << infoGeral[i][1][3] << endl;
+    pressEnter();
+  }
 }
 
 void clearScreen()
