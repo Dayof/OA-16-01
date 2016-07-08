@@ -23,7 +23,7 @@ public:
   int searchStudentInPkIndex2(string);
   int searchStudentInPkIndex3(string);
 
-  void deleteStudentPkIndex(int, int);
+  bool deleteStudentPkIndex(int, int);
   bool completeDelStudent();
   bool delInFile(string, string, vector<pair<string, int> >);
 
@@ -39,6 +39,8 @@ public:
   void loadPkIndex(string, int);
   void loadSkIndex(string, int);
   void attPkIndex();
+
+  void errorsIndex(vector<string>);
 private:
   vector<pair<string,int> > indexList, indexList2, indexList3;
   vector<pair<string, vector<string> > > indexSkList, indexSkList2, indexSkList3;
@@ -210,6 +212,7 @@ void StudentManagement::insertNewStudent()
     }
 
     index.close();
+
   }
   else showMenu();
 }
@@ -289,7 +292,7 @@ bool StudentManagement::askInfoStudent(vector<string> &infoStudent)
 void StudentManagement::deleteStudent()
 {
   string id, ans;
-  bool incorrect = false;
+  bool incorrect = false, result, result2, result3;
   int pos_student1, pos_student2, pos_student3;
 
   clearScreen();
@@ -324,16 +327,16 @@ void StudentManagement::deleteStudent()
 
   if(ans=="y")
   {
-    if(pos_student1>=0) this->deleteStudentPkIndex(pos_student1, 1);
-    if(pos_student2>=0) this->deleteStudentPkIndex(pos_student2, 2);
-    if(pos_student3>=0) this->deleteStudentPkIndex(pos_student3, 3);
+    if(pos_student1>=0) result=this->deleteStudentPkIndex(pos_student1, 1);
+    if(pos_student2>=0) result2=this->deleteStudentPkIndex(pos_student2, 2);
+    if(pos_student3>=0) result3=this->deleteStudentPkIndex(pos_student3, 3);
     cout << "Aluna(o) deletada(o) com sucesso." << endl;
     pressEnter();
   }
-  showMenu();
+  if(!result && !result2 && !result3) showMenu();
 }
 
-void StudentManagement::deleteStudentPkIndex(int pos_student, int index)
+bool StudentManagement::deleteStudentPkIndex(int pos_student, int index)
 {
   if(index==1)
   {
@@ -359,7 +362,11 @@ void StudentManagement::deleteStudentPkIndex(int pos_student, int index)
     cout << "Executando gerador de índices..." << endl;
     system("./gera_index lista1.txt lista2.txt lista3.txt");
     cout << "Índices atualizados!" << endl;
+
+    return true;
   }
+
+  return false;
 }
 
 int StudentManagement::searchStudentInPkIndex1(string id)
@@ -683,14 +690,25 @@ bool StudentManagement::gradStudentDisc(int pos_student, int index,
   return true;
 }
 
+void StudentManagement::errorsIndex(vector<string> erros)
+{
+  cout << "As seguintes IDs possuem nota mas não estão registradas na Lista1:"
+  << endl;
+  for(int i=0; i<erros.size(); ++i)
+    cout << erros[i] << " " << endl;
+
+  cout << endl;
+
+  pressEnter();
+}
+
 // If a student id is missing of a list file then
 // the second vector will have less element
-// TODO students that exist in list2 or list3 but not in list1
 // TODO students with duplicate grad in list2 or list3
 // infogeral[infostu[infolist1, infolist2, infolist3]]
 void StudentManagement::report()
 {
-  string id1, id2, id3, mat, nome, op, curso, turma, grad1, grad2;
+  string id1, id2, id3, mat, nome, op, curso, turma, grad1, grad2, aux;
   vector<string> infoList1, infoList2, infoList3;
   vector<vector<vector<string> > > infoGeral;
   ifstream indexInfoGrad1File("lista2.txt");
@@ -698,7 +716,20 @@ void StudentManagement::report()
   ifstream indexInfoFile("lista1.txt");
   vector<vector<string> > infoStu;
   bool found1=false, found2=false;
+  vector<string> ID, ID23, errors;
+  vector<string>::iterator itID;
 
+  for(int o=0; o<this->indexListPRR2.size(); ++o)
+    ID23.push_back(indexListPRR2[o].first);
+  for(int o=0; o<this->indexListPRR3.size(); ++o)
+    if(find(ID23.begin(), ID23.end(), this->indexListPRR3[o].first)==ID23.end())
+      ID23.push_back(indexListPRR3[o].first);
+
+  for(int o=0; o<this->indexListPRR.size(); ++o)
+    if(find(ID23.begin(), ID23.end(), this->indexListPRR[o].first)==ID23.end())
+      errors.push_back(this->indexListPRR[o].first);
+
+  this->errorsIndex(errors);
 
   if(indexInfoFile.is_open() && indexInfoGrad1File.is_open() &&
     indexInfoGrad2File.is_open())
